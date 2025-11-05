@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Калькулятор прибутку — Refactored</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'space-grotesk': ['Space Grotesk', 'sans-serif'],
+                        'roboto-mono': ['Roboto Mono', 'monospace'],
+                    },
+                    screens: {
+                        'lg': '991px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-black antialiased min-h-screen flex items-start justify-center p-8">
+    <main class="w-full max-w-3xl">
+        <div class="button text-left w-full font-bold mb-6">
+            <a href="/">← Back</a>
+        </div>
+        <header class="mb-6">
+            <h1
+                class="text-2xl font-semibold text-center text-black bg-[#b9ff66] rounded-[7px] px-10 py-2 w-full text-center">
+                Cryptocurrencies</h1>
+            <p class="text-sm text-center text-gray-600 mt-2">Ввівши дані, отримуєш прибуток у кожному блоці і сумарний
+                прибуток.</p>
+        </header>
+
+        <section class="space-y-4" aria-live="polite" aria-atomic="true">
+            <div id="calculators" class="space-y-4"></div>
+
+            <div class="flex gap-3 mt-4">
+                <button id="addBtn"
+                    class="flex-1 py-2 rounded-lg bg-black text-white hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-lime-300">Додати
+                    калькулятор</button>
+                <button id="clearAllBtn"
+                    class="py-2 px-3 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none">Очистити
+                    всі</button>
+            </div>
+
+            <div class="mt-6 p-4 rounded-xl border bg-white flex items-center justify-between">
+                <div>
+                    <div class="text-sm text-black">Сумарний прибуток</div>
+                    <div id="total" class="text-2xl font-bold text-black">0.00 USD</div>
+                </div>
+                <div class="text-sm text-gray-500">Не враховуючи комісії</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Template for calculator block -->
+    <template id="calcTemplate">
+        <article class="p-4 border rounded-xl bg-white" data-id="">
+            <div class="flex items-start justify-between">
+                <h2 class="text-sm font-medium text-gray-800">Калькулятор</h2>
+                <div class="flex gap-2">
+                    <button
+                        class="removeBtn text-sm px-3 py-1 rounded-lg border border-red-100 text-red-600 hover:bg-red-50 focus:outline-none"
+                        type="button" aria-label="Видалити калькулятор">Видалити</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+                <label class="block">
+                    <span class="text-xs text-gray-600">Вартість покупки (USD)</span>
+                    <input type="number" inputmode="decimal" min="0" step="0.01"
+                        class="buyPrice mt-1 w-full border rounded px-3 py-2" aria-label="Вартість покупки">
+                </label>
+
+                <label class="block">
+                    <span class="text-xs text-gray-600">Сума покупки (USD)</span>
+                    <input type="number" inputmode="decimal" min="0" step="0.01"
+                        class="buyAmount mt-1 w-full border rounded px-3 py-2" aria-label="Сума покупки">
+                </label>
+
+                <label class="block">
+                    <span class="text-xs text-gray-600">Вартість продажу (USD)</span>
+                    <input type="number" inputmode="decimal" min="0" step="0.01"
+                        class="sellPrice mt-1 w-full border rounded px-3 py-2" aria-label="Вартість продажу">
+                </label>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between gap-3">
+                <button
+                    class="calcBtn flex-none bg-[#b9ff66] font-bold text-black hover:text-white px-4 py-2 rounded-lg hover:bg-black focus:outline-none">Розрахувати</button>
+                <div class="result text-right text-sm font-semibold text-black">Прибуток: <span class="profitVal">0.00
+                        USD</span></div>
+            </div>
+
+            <p class="text-xs text-gray-500 mt-2">Підказка: значення підраховуються при натисканні «Розрахувати» або при
+                зміні полів (з затримкою).</p>
+        </article>
+    </template>
+
+    <script>
+        // ---------- Utilities ----------
+        const formatUSD = (n) => {
+            if (!isFinite(n)) return '0.00 USD';
+            return (typeof n === 'number' ? n : Number(n)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+        };
+
+        const debounce = (fn, wait = 300) => {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), wait);
+            };
+        };
+
+        // ---------- DOM refs ----------
+        const calculatorsWrap = document.getElementById('calculators');
+        const addBtn = document.getElementById('addBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const totalEl = document.getElementById('total');
+        const template = document.getElementById('calcTemplate');
+
+        // ---------- State ----------
+        let idCounter = 0;
+
+        // ---------- Core logic ----------
+        function createCalculator(initial = {}) {
+            const node = template.content.firstElementChild.cloneNode(true);
+            const id = ++idCounter;
+            node.dataset.id = String(id);
+
+            const buyPrice = node.querySelector('.buyPrice');
+            const buyAmount = node.querySelector('.buyAmount');
+            const sellPrice = node.querySelector('.sellPrice');
+            const calcBtn = node.querySelector('.calcBtn');
+            const removeBtn = node.querySelector('.removeBtn');
+            const profitVal = node.querySelector('.profitVal');
+
+            // Set initial values if provided
+            if (initial.buyPrice != null) buyPrice.value = initial.buyPrice;
+            if (initial.buyAmount != null) buyAmount.value = initial.buyAmount;
+            if (initial.sellPrice != null) sellPrice.value = initial.sellPrice;
+
+            // Calculation function
+            const calculate = () => {
+                const bp = parseFloat(buyPrice.value);
+                const ba = parseFloat(buyAmount.value);
+                const sp = parseFloat(sellPrice.value);
+
+                if (![bp, ba, sp].every(v => isFinite(v) && v >= 0)) {
+                    profitVal.textContent = '—';
+                    updateTotal();
+                    return;
+                }
+
+                // ETH amount = purchase USD / buy price per ETH
+                const ethAmount = (ba / bp) || 0;
+                const sellValue = ethAmount * sp;
+                const profit = sellValue - ba;
+
+                profitVal.textContent = formatUSD(profit);
+                updateTotal();
+            };
+
+            const debouncedCalc = debounce(calculate, 350);
+
+            // Events
+            calcBtn.addEventListener('click', calculate);
+            removeBtn.addEventListener('click', () => {
+                node.remove();
+                updateTotal();
+            });
+
+            // Auto calc on input with debounce
+            [buyPrice, buyAmount, sellPrice].forEach(inp => {
+                inp.addEventListener('input', debouncedCalc);
+                inp.addEventListener('change', calculate); // immediate on change (e.g., paste)
+            });
+
+            calculatorsWrap.appendChild(node);
+            // run first calculation once
+            calculate();
+            // return element reference if needed
+            return node;
+        }
+
+        function updateTotal() {
+            const profitEls = calculatorsWrap.querySelectorAll('.profitVal');
+            let total = 0;
+            profitEls.forEach(el => {
+                const txt = el.textContent.replace(/[,$\s]/g, '');
+                const num = parseFloat(txt);
+                if (isFinite(num)) total += num;
+            });
+            totalEl.textContent = formatUSD(total);
+        }
+
+        // ---------- Controls ----------
+        addBtn.addEventListener('click', () => createCalculator());
+        clearAllBtn.addEventListener('click', () => {
+            calculatorsWrap.innerHTML = '';
+            updateTotal();
+        });
+
+        // Add initial one calculator
+        createCalculator({
+            buyPrice: '100',
+            buyAmount: '1',
+            sellPrice: '120'
+        });
+    </script>
+</body>
+
+</html>

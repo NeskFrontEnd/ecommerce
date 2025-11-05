@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятор зарплати з податками</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'space-grotesk': ['Space Grotesk', 'sans-serif'],
+                        'roboto-mono': ['Roboto Mono', 'monospace'],
+                    },
+                    screens: {
+                        'lg': '991px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Ліва колонка -->
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-2xl font-bold mb-4">Калькулятор зарплати з податками</h2>
+
+            <label for="netUsd">Бажана ЗП (на руки) у USD:</label>
+            <input type="number" id="netUsd" class="w-full border p-2 mb-2" step="0.01">
+
+            <label for="salaryEur">Сума в EUR (виплата з податками):</label>
+            <input type="number" id="salaryEur" class="w-full border p-2 mb-2" step="0.01">
+
+            <label for="eurToUah">Курс EUR/UAH:</label>
+            <input type="number" id="eurToUah" class="w-full border p-2 mb-2" step="0.01">
+
+            <label for="usdToUah">Курс USD/UAH:</label>
+            <input type="number" id="usdToUah" class="w-full border p-2 mb-2" step="0.01">
+
+            <label for="taxPercent">Єдиний податок (%):</label>
+            <input type="number" id="taxPercent" class="w-full border p-2 mb-2" value="5" step="0.1">
+
+            <label for="militaryPercent">Військовий збір (%):</label>
+            <input type="number" id="militaryPercent" class="w-full border p-2 mb-2" value="0.5" step="0.1">
+
+            <label for="esvUah">ЄСВ (в грн):</label>
+            <input type="number" id="esvUah" class="w-full border p-2 mb-4" value="1760">
+
+            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                onclick="calculate()">Розрахувати</button>
+
+            <div class="result mt-4 p-4 bg-gray-50 border rounded" id="result"></div>
+        </div>
+
+        <!-- Права колонка -->
+        <div class="bg-white p-6 rounded shadow">
+            <h3 class="text-xl font-semibold mb-4">Курси валют</h3>
+
+            <label for="rateDate">Дата курсу НБУ:</label>
+            <input type="date" id="rateDate" class="w-full border p-2 mb-4">
+
+            <div id="exchangeRates" class="mb-4 text-gray-800">
+                <p>Завантаження курсу...</p>
+            </div>
+
+            <div class="flex gap-2">
+                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    onclick="fetchRates()">Оновити курс (сьогодні)</button>
+                <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                    onclick="fetchRatesByDate()">Отримати курс за дату</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchRates() {
+            const exchangeEl = document.getElementById('exchangeRates');
+            exchangeEl.innerHTML = 'Завантаження...';
+
+            try {
+                const [nbu, mono] = await Promise.all([
+                    fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json').then(res => res.json()),
+                    fetch('https://api.monobank.ua/bank/currency').then(res => res.json())
+                ]);
+
+                const nbuEur = nbu.find(x => x.cc === 'EUR');
+                const nbuUsd = nbu.find(x => x.cc === 'USD');
+
+                const monoEur = mono.find(x => x.currencyCodeA === 978 && x.currencyCodeB === 980);
+                const monoUsd = mono.find(x => x.currencyCodeA === 840 && x.currencyCodeB === 980);
+
+                exchangeEl.innerHTML = `
+          <strong>Курс НБУ:</strong><br>
+          EUR: ${nbuEur.rate.toFixed(2)} грн<br>
+          USD: ${nbuUsd.rate.toFixed(2)} грн<br>
+          <small>Курс на дату: ${nbuEur.exchangedate} | Сьогодні: ${new Date().toLocaleDateString('uk-UA')}</small><br><br>
+
+          <strong>Курс Monobank:</strong><br>
+          EUR: ${monoEur.rateBuy.toFixed(2)} / ${monoEur.rateSell.toFixed(2)} грн<br>
+          USD: ${monoUsd.rateBuy.toFixed(2)} / ${monoUsd.rateSell.toFixed(2)} грн<br>
+          <small>Оновлено: зараз</small>
+        `;
+
+                document.getElementById('eurToUah').value = nbuEur.rate.toFixed(2);
+                document.getElementById('usdToUah').value = nbuUsd.rate.toFixed(2);
+            } catch (err) {
+                exchangeEl.innerHTML = '<span class="text-red-600">Помилка завантаження курсу.</span>';
+            }
+        }
+
+        async function fetchRatesByDate() {
+            const dateInput = document.getElementById('rateDate').value;
+            const exchangeEl = document.getElementById('exchangeRates');
+
+            if (!dateInput) {
+                exchangeEl.innerHTML = '<span class="text-red-600">Виберіть дату.</span>';
+                return;
+            }
+
+            const formatted = dateInput.replace(/-/g, ''); // yyyy-mm-dd -> yyyymmdd
+
+            exchangeEl.innerHTML = 'Завантаження курсу за дату...';
+
+            try {
+                const response = await fetch(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${formatted}&json`);
+                const data = await response.json();
+
+                const eur = data.find(x => x.cc === 'EUR');
+                const usd = data.find(x => x.cc === 'USD');
+
+                exchangeEl.innerHTML = `
+          <strong>Курс НБУ на ${eur.exchangedate}:</strong><br>
+          EUR: ${eur.rate.toFixed(2)} грн<br>
+          USD: ${usd.rate.toFixed(2)} грн<br>
+          <small>Сьогодні: ${new Date().toLocaleDateString('uk-UA')}</small><br><br>
+          <em>⚠️ Monobank доступний лише для поточного дня.</em>
+        `;
+
+                document.getElementById('eurToUah').value = eur.rate.toFixed(2);
+                document.getElementById('usdToUah').value = usd.rate.toFixed(2);
+            } catch (err) {
+                exchangeEl.innerHTML = '<span class="text-red-600">Не вдалося отримати курс за вибрану дату.</span>';
+            }
+        }
+
+        function calculate() {
+            const netUsd = parseFloat(document.getElementById('netUsd').value);
+            const salaryEur = parseFloat(document.getElementById('salaryEur').value);
+            const eurToUah = parseFloat(document.getElementById('eurToUah').value);
+            const usdToUah = parseFloat(document.getElementById('usdToUah').value);
+            const taxPercent = parseFloat(document.getElementById('taxPercent').value);
+            const militaryPercent = parseFloat(document.getElementById('militaryPercent').value);
+            const esvUah = parseFloat(document.getElementById('esvUah').value);
+
+            if (isNaN(salaryEur) || isNaN(eurToUah) || isNaN(usdToUah) || isNaN(netUsd)) {
+                document.getElementById('result').innerHTML = 'Будь ласка, введіть усі значення.';
+                return;
+            }
+
+            const salaryUsd = salaryEur * (eurToUah / usdToUah);
+            const taxUsd = salaryUsd - netUsd;
+
+            const taxAmount = (taxPercent / 100) * netUsd;
+            const militaryAmount = (militaryPercent / 100) * netUsd;
+            const esvUsd = esvUah / usdToUah;
+            const totalTaxes = taxAmount + militaryAmount + esvUsd;
+
+            const diff = Math.abs(totalTaxes - taxUsd);
+            const matched = diff < 1 ? '✅ Податки зійшлися приблизно правильно.' : '⚠️ Податки не збігаються. Різниця: $' + diff.toFixed(2);
+
+            document.getElementById('result').innerHTML = `
+        <strong>Конвертовано: ${salaryUsd.toFixed(2)} USD</strong><br>
+        Бажана ЗП (на руки): $${netUsd.toFixed(2)}<br>
+        Єдиний податок (${taxPercent}%): $${taxAmount.toFixed(2)}<br>
+        Військовий збір (${militaryPercent}%): $${militaryAmount.toFixed(2)}<br>
+        ЄСВ: $${esvUsd.toFixed(2)}<br>
+        Загальна сума податків: $${totalTaxes.toFixed(2)}<br>
+        ${matched}
+      `;
+        }
+
+        fetchRates();
+    </script>
+</body>
+
+</html>
