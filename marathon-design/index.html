@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-денний Марафон Web-Дизайну | Figma + AI</title>
+    <meta name="description" content="Опануй веб-дизайн з нуля за 10 днів. Figma, Photoshop та генерація коду через AI. Авторський курс Миколи Конченка.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    
+    <!-- Custom Config for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // Indigo
+                        secondary: '#ec4899', // Pink
+                        dark: '#0f172a', // Slate 900
+                        darker: '#020617', // Slate 950
+                        accent: '#10b981', // Emerald
+                        warning: '#f59e0b', // Amber
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-darker text-white font-sans antialiased overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-darker/90 backdrop-blur-md border-b border-white/10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                DESIGN<span class="text-white">MARATHON</span>
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#why-now" class="hover:text-primary transition">Чому дизайн?</a>
+                <a href="#program" class="hover:text-primary transition">Програма</a>
+                <a href="#works" class="hover:text-primary transition">Роботи</a>
+                <a href="#reviews" class="hover:text-primary transition">Відгуки</a>
+            </div>
+            <a href="#register" class="hidden md:inline-block px-6 py-2 bg-white text-dark font-bold rounded-full hover:bg-primary hover:text-white transition transform hover:scale-105">
+                Записатися
+            </a>
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-2xl">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dark border-t border-white/10 p-6 absolute w-full">
+            <div class="flex flex-col space-y-4">
+                <a href="#program" class="block hover:text-primary">Програма</a>
+                <a href="#works" class="block hover:text-primary">Роботи</a>
+                <a href="#reviews" class="block hover:text-primary">Відгуки</a>
+                <a href="#register" class="block hover:text-primary font-bold text-accent">Записатися</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Background Effects -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="inline-block px-4 py-2 mb-6 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm animate-float">
+                <span class="text-accent font-bold"><i class="fas fa-bolt mr-2"></i>Старт 15 січня 2026</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-7xl font-display font-bold mb-6 leading-tight">
+                За 10 днів зроби <br> 
+                свій перший сайт та <br>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-orange-500">
+                    отримай перші гроші
+                </span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                Покроковий марафон з <span class="text-white font-bold">Миколою Конченком</span>. 
+                Вивчи Figma, створи портфоліо та згенеруй код сайту за допомогою AI. 
+                Доступ до закритого чату та щоденні матеріали.
+            </p>
+
+            <!-- Countdown Timer -->
+            <div class="mb-10 p-4 md:p-6 bg-white/5 border border-white/10 rounded-2xl inline-block backdrop-blur-md w-full max-w-2xl">
+                <p class="text-sm text-gray-400 mb-4 uppercase tracking-widest flex justify-center items-center gap-2">
+                    <i class="fas fa-stopwatch text-red-500"></i> Знижка -15% згорає через:
+                </p>
+                <div class="flex justify-center gap-4 md:gap-8" id="countdown">
+                    <!-- Timer JS -->
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="#register" class="px-8 py-4 bg-gradient-to-r from-primary to-secondary rounded-full font-bold text-lg shadow-lg shadow-primary/25 hover:shadow-primary/50 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i> Хочу на марафон
+                </a>
+                <a href="#program" class="px-8 py-4 bg-transparent border border-white/20 rounded-full font-bold text-lg hover:bg-white/10 transition">
+                    Дивитися програму
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Why Web Design Now? (Money & Market) -->
+    <section id="why-now" class="py-20 bg-dark">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-5xl font-display font-bold text-center mb-16">
+                Чому саме веб-дизайн <span class="text-accent">сьогодні?</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-20">
+                <div class="space-y-8">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0 text-xl">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Ринок зростає</h3>
+                            <p class="text-gray-400">Кожному бізнесу, від кав'ярні до IT-стартапу, потрібен сайт. Попит на дизайнерів перевищує пропозицію.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center text-accent shrink-0 text-xl">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">Швидкий старт в доходах</h3>
+                            <p class="text-gray-400">Новачок може брати $100-200 за перший лендінг вже через місяць. Середня зарплата Junior дизайнера — $600-$900.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary shrink-0 text-xl">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">AI - твій помічник, а не ворог</h3>
+                            <p class="text-gray-400">Ми навчимо використовувати штучний інтелект, щоб робити роботу в 3 рази швидше за інших.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Card -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-8 relative">
+                    <div class="absolute -top-4 -right-4 bg-accent text-dark font-bold px-4 py-2 rounded-full">
+                        Реальні цифри
+                    </div>
+                    <h3 class="text-gray-400 text-sm uppercase tracking-widest mb-6">Скільки заробляють веб-дизайнери</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-bold">Фріланс (за 1 проект)</span>
+                                <span class="text-accent">$150 - $500</span>
+                            </div>
+                            <div class="w-full bg-white/10 rounded-full h-2">
+                                <div class="bg-accent h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-bold">Junior (в офісі)</span>
+                                <span class="text-primary">$600 - $1000</span>
+                            </div>
+                            <div class="w-full bg-white/10 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-bold">Middle (досвід 1-2 роки)</span>
+                                <span class="text-secondary">$1500 - $2500</span>
+                            </div>
+                            <div class="w-full bg-white/10 rounded-full h-2">
+                                <div class="bg-secondary h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-8 text-sm text-gray-500 text-center">
+                        *Дані на основі статистики Djinni та Upwork за 2025 рік
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What you get (Format) -->
+    <section class="py-20 bg-darker border-y border-white/5">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-display font-bold text-center mb-12">Формат "Повне занурення"</h2>
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="bg-white/5 p-6 rounded-2xl text-center hover:bg-white/10 transition">
+                    <i class="fab fa-telegram text-5xl text-blue-400 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Чат-бот Наставник</h3>
+                    <p class="text-gray-400 text-sm">Підключення до бота, який надсилає уроки та нагадування.</p>
+                </div>
+                <div class="bg-white/5 p-6 rounded-2xl text-center hover:bg-white/10 transition">
+                    <i class="fas fa-file-pdf text-5xl text-red-400 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Щоденні PDF</h3>
+                    <p class="text-gray-400 text-sm">Шпаргалки, чек-листи та гайди щоранку. Зберігай назавжди.</p>
+                </div>
+                <div class="bg-white/5 p-6 rounded-2xl text-center hover:bg-white/10 transition">
+                    <i class="fas fa-users text-5xl text-green-400 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Закритий Ком'юніті</h3>
+                    <p class="text-gray-400 text-sm">Чат учасників, де ми ділимося успіхами, вакансіями та підтримкою.</p>
+                </div>
+                <div class="bg-white/5 p-6 rounded-2xl text-center hover:bg-white/10 transition">
+                    <i class="fas fa-star text-5xl text-yellow-400 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Мотивація та Кар'єра</h3>
+                    <p class="text-gray-400 text-sm">Інструкції "Як знайти першого клієнта" та розбір страхів.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed 10 Day Program -->
+    <section id="program" class="py-20 bg-dark">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-display font-bold mb-4">Твій шлях за 10 днів</h2>
+                <p class="text-gray-400">Від "повного нуля" до працюючого сайту та упакованого кейсу.</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-4">
+                <!-- Day 1 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-primary text-white font-bold text-xl px-4 py-2 rounded-lg shadow-lg shadow-primary/50">01</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Старт. Ознайомлення.</h3>
+                            <p class="text-gray-400 mt-2">Реєстрація в сервісах. Огляд програми курсу. Встановлення цілей. Перші кроки в ком'юніті.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Day 2 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">02</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Figma: Інструмент дизайнера</h3>
+                            <p class="text-gray-400 mt-2">Детальний огляд інтерфейсу. Фрейми, шейпи, шари. Гарячі клавіші, які прискорюють роботу в 5 разів.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 3 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">03</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Перший банер + База дизайну</h3>
+                            <p class="text-gray-400 mt-2">Практика: створюємо простий рекламний банер. Теорія: Типографіка (шрифти), психологія кольору, контрасти.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 4 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">04</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Головний екран (Hero Section)</h3>
+                            <p class="text-gray-400 mt-2">Теорія композиції та "повітря". Створюємо перший екран сайту, який продає.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 5 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">05</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Підготовка до великого проекту</h3>
+                            <p class="text-gray-400 mt-2">Що таке Moodboard та Wireframe (прототип). Як написати Технічне Завдання (ТЗ). Основи мобільного дизайну.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 6 -->
+                <div class="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-secondary/30 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-secondary text-white font-bold text-xl px-4 py-2 rounded-lg shadow-lg shadow-secondary/50">06</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">AI та ТЗ <i class="fas fa-robot text-secondary"></i></h3>
+                            <p class="text-gray-300 mt-2">Вибір теми курсового проекту. Написання ТЗ та текстів для сайту за допомогою штучного інтелекту (ChatGPT/Claude).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 7 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">07</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Прототипування та UI-Kit</h3>
+                            <p class="text-gray-400 mt-2">Створення "скелету" сайту (Wireframe). Підбір стилів, створення бібліотеки компонентів (UI-Kit). Початок чистового дизайну.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 8 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">08</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Дизайн та Адаптив</h3>
+                            <p class="text-gray-400 mt-2">Доробляємо дизайн головної сторінки. Створюємо мобільну версію (Mobile First підхід).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 9 -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-white/10 text-gray-300 font-bold text-xl px-4 py-2 rounded-lg">09</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Упаковка кейсу на Behance</h3>
+                            <p class="text-gray-400 mt-2">Вчимося презентувати свою роботу так, щоб клієнти хотіли її купити. Оформлення портфоліо.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day 10 -->
+                <div class="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 border border-accent/30 rounded-xl overflow-hidden">
+                    <div class="p-6 flex items-start gap-4">
+                        <div class="bg-accent text-white font-bold text-xl px-4 py-2 rounded-lg shadow-lg shadow-accent/50">10</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">Фінал: Design to Code <i class="fas fa-code text-accent"></i></h3>
+                            <p class="text-gray-300 mt-2">Генерація дизайну в HTML/CSS за допомогою <strong class="text-white">Figma AI</strong>. Написання промтів для якісного коду. Огляд конструкторів (Webflow/Tilda). Вручення сертифікатів.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Works (Gallery) -->
+    <section id="works" class="py-20 bg-darker">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-center mb-4">Що створюють наші студенти</h2>
+            <p class="text-gray-400 text-center mb-12">Це роботи новачків, зроблені за 10 днів марафону</p>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Work 1 -->
+                <div class="group relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-800 cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-6">
+                        <div>
+                            <p class="text-white font-bold">Travel Landing Page</p>
+                            <p class="text-accent text-sm">Студент: Олена К.</p>
+                        </div>
+                    </div>
+                    <!-- Placeholder graphic -->
+                    <div class="w-full h-full bg-[#1e1e1e] flex items-center justify-center border border-white/5">
+                        <i class="fas fa-plane text-6xl text-white/10 group-hover:text-white/30 transition"></i>
+                    </div>
+                </div>
+                <!-- Work 2 -->
+                <div class="group relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-800 cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-6">
+                        <div>
+                            <p class="text-white font-bold">E-commerce App</p>
+                            <p class="text-accent text-sm">Студент: Максим Д.</p>
+                        </div>
+                    </div>
+                    <div class="w-full h-full bg-[#1e1e1e] flex items-center justify-center border border-white/5">
+                        <i class="fas fa-shopping-bag text-6xl text-white/10 group-hover:text-white/30 transition"></i>
+                    </div>
+                </div>
+                <!-- Work 3 -->
+                <div class="group relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-800 cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-6">
+                        <div>
+                            <p class="text-white font-bold">Coffee Shop Site</p>
+                            <p class="text-accent text-sm">Студент: Ірина В.</p>
+                        </div>
+                    </div>
+                    <div class="w-full h-full bg-[#1e1e1e] flex items-center justify-center border border-white/5">
+                        <i class="fas fa-coffee text-6xl text-white/10 group-hover:text-white/30 transition"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews & Success Stories -->
+    <section id="reviews" class="py-20 bg-gradient-to-b from-dark to-primary/5">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-5xl font-display font-bold text-center mb-16">Історії успіху</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Review 1 -->
+                <div class="bg-darker border border-white/10 p-8 rounded-2xl relative">
+                    <i class="fas fa-quote-right absolute top-8 right-8 text-4xl text-white/5"></i>
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl mr-4">А</div>
+                        <div>
+                            <h4 class="font-bold">Анна, 24 роки</h4>
+                            <p class="text-sm text-gray-400">Бухгалтер -> Web-дизайнер</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic mb-4">"Я думала, що дизайн - це не для мене, бо не вмію малювати. На 5-й день марафону я зробила перший макет, який показала знайомій власниці магазину. Вона замовила у мене сайт! <strong class="text-accent">Я відбила вартість курсу ще до його закінчення.</strong>"</p>
+                    <div class="flex text-yellow-400 text-sm">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- Review 2 -->
+                <div class="bg-darker border border-white/10 p-8 rounded-2xl relative">
+                    <i class="fas fa-quote-right absolute top-8 right-8 text-4xl text-white/5"></i>
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-xl mr-4">О</div>
+                        <div>
+                            <h4 class="font-bold">Олег, 29 років</h4>
+                            <p class="text-sm text-gray-400">Менеджер -> Фрілансер</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic mb-4">"Найкрутіше - це блок про AI. Я раніше боявся коду, але на 10-й день Figma AI згенерувала мені готовий HTML. Тепер я продаю клієнтам не просто картинки, а готові сайти. Дохід зріс вдвічі."</p>
+                    <div class="flex text-yellow-400 text-sm">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Author Section (Existing but polished) -->
+    <section id="author" class="py-20 relative overflow-hidden border-t border-white/5">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="w-full md:w-1/2 relative text-center md:text-left">
+                     <h2 class="text-3xl md:text-5xl font-display font-bold mb-6">Твій ментор <br> <span class="text-primary">Микола Конченко</span></h2>
+                     <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                        "Моя ціль — не просто навчити тебе натискати кнопки в Figma, а дати професію, яка приносить гроші і свободу. Я пройшов цей шлях сам і проведу тебе за руку."
+                    </p>
+                    <ul class="space-y-4 inline-block text-left">
+                        <li class="flex items-center"><i class="fas fa-check-circle text-accent mr-3"></i> 10+ років у дизайні</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-accent mr-3"></i> 50+ успішних випускників</li>
+                        <li class="flex items-center"><i class="fas fa-check-circle text-accent mr-3"></i> Senior Product Designer</li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/2 flex justify-center">
+                    <div class="relative w-64 h-64 md:w-80 md:h-80 bg-gray-800 rounded-full overflow-hidden border-4 border-primary/30 shadow-[0_0_50px_rgba(99,102,241,0.3)]">
+                         <!-- Placeholder icon instead of photo -->
+                         <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-900">
+                            <i class="fas fa-user-tie text-8xl text-gray-500"></i>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Form / Pricing -->
+    <section id="register" class="py-20 bg-gradient-to-t from-primary/20 to-darker">
+        <div class="container mx-auto px-6">
+            <div class="max-w-5xl mx-auto bg-dark border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div class="flex flex-col md:flex-row">
+                    <!-- Pricing Info -->
+                    <div class="p-10 md:w-1/2 bg-white/5 flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold mb-2 text-gray-400">Тариф "Результат"</h3>
+                        <div class="mb-6">
+                            <span class="text-5xl font-bold text-white">$42.50</span>
+                            <span class="text-xl text-gray-500 line-through ml-2">$50</span>
+                            <div class="inline-block bg-accent/20 text-accent text-xs font-bold px-2 py-1 rounded ml-2">
+                                -15% СЬОГОДНІ
+                            </div>
+                        </div>
+                        
+                        <ul class="space-y-3 text-gray-300 mb-8">
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> 10 днів практики</li>
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> <strong>Чат-бот з уроками</strong></li>
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> Перевірка ДЗ куратором</li>
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> Щоденні PDF-шпаргалки</li>
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> Закритий чат вакансій</li>
+                            <li class="flex items-center"><i class="fas fa-check text-primary mr-2"></i> Сертифікат</li>
+                        </ul>
+                    </div>
+
+                    <!-- Form -->
+                    <div class="p-10 md:w-1/2 bg-darker">
+                        <h3 class="text-2xl font-bold mb-6 text-center">Забронювати місце</h3>
+                        <form class="space-y-4" onsubmit="event.preventDefault(); alert('Вітаємо! Ви зареєстровані. Зараз ви будете перенаправлені до Telegram-бота для отримання першого уроку.');">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Ім'я</label>
+                                <div class="relative">
+                                    <i class="fas fa-user absolute left-4 top-3.5 text-gray-500"></i>
+                                    <input type="text" placeholder="Ваше ім'я" class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary transition" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Email</label>
+                                <div class="relative">
+                                    <i class="fas fa-envelope absolute left-4 top-3.5 text-gray-500"></i>
+                                    <input type="email" placeholder="email@example.com" class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary transition" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-1">Телефон (Telegram)</label>
+                                <div class="relative">
+                                    <i class="fas fa-phone absolute left-4 top-3.5 text-gray-500"></i>
+                                    <input type="tel" placeholder="+380..." class="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-primary transition" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-xl py-4 text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition transform hover:-translate-y-1 mt-4">
+                                Оплатити зі знижкою <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                            <p class="text-xs text-center text-gray-500 mt-4">
+                                Натискаючи кнопку, ви погоджуєтесь з публічною офертою.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-darker py-12 border-t border-white/10 text-sm">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-2xl font-bold mb-4">DesignMarathon 2026</h2>
+            <p class="text-gray-500 mb-8">ФОП Конченко М.В.</p>
+            <div class="flex justify-center space-x-6 mb-8">
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-telegram text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-youtube text-2xl"></i></a>
+            </div>
+            <p class="text-gray-600">&copy; 2025 Всі права захищено.</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

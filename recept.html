@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Топ рецепти — Лендінг</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --accent-yellow: #f6c84c;
+            --accent-green: #7fc77f
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', serif
+        }
+
+        /* subtle card transition */
+        .card-img {
+            height: 160px;
+            object-fit: cover;
+            width: 100%
+        }
+
+        @media(min-width:1024px) {
+            .card-img {
+                height: 200px
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-900 antialiased">
+    <!-- Header -->
+    <header class="border-b py-4">
+        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+            <a class="flex items-center gap-3" href="#">
+                <div class="w-10 h-10 rounded-md"
+                    style="background:linear-gradient(135deg,var(--accent-yellow),var(--accent-green))"></div>
+                <div>
+                    <h1 class="text-xl font-semibold">Топ рецепти</h1>
+                    <p class="text-xs text-gray-500">Прості та перевірені страви</p>
+                </div>
+            </a>
+
+            <nav class="hidden md:flex gap-6 items-center text-sm">
+                <button class="filter-btn px-3 py-2 rounded hover:bg-gray-100" data-filter="breakfast">Сніданки</button>
+                <button class="filter-btn px-3 py-2 rounded hover:bg-gray-100" data-filter="lunch">Обід</button>
+                <button class="filter-btn px-3 py-2 rounded hover:bg-gray-100" data-filter="dinner">Вечеря</button>
+                <button class="filter-btn px-3 py-2 rounded hover:bg-gray-100" data-filter="snack">Перекуси</button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <button id="addRecipeBtn"
+                    class="hidden md:inline-flex items-center px-4 py-2 bg-black text-white rounded text-sm">Додати
+                    рецепт</button>
+
+                <!-- mobile menu button -->
+                <div class="md:hidden">
+                    <button id="mobileMenuBtn" class="p-2 rounded border">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- mobile nav -->
+        <div id="mobileMenu" class="md:hidden hidden border-t">
+            <div class="px-4 py-3 flex gap-2">
+                <button class="filter-btn flex-1 text-left px-3 py-2 rounded" data-filter="breakfast">Сніданки</button>
+                <button class="filter-btn flex-1 text-left px-3 py-2 rounded" data-filter="lunch">Обід</button>
+            </div>
+            <div class="px-4 py-3 flex gap-2">
+                <button class="filter-btn flex-1 text-left px-3 py-2 rounded" data-filter="dinner">Вечеря</button>
+                <button class="filter-btn flex-1 text-left px-3 py-2 rounded" data-filter="snack">Перекуси</button>
+            </div>
+            <div class="px-4 pb-4">
+                <button id="mobileAddBtn" class="w-full text-left px-3 py-2 rounded border">Додати рецепт</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Filter Tabs (desktop compact) -->
+        <div class="hidden md:flex items-center gap-3 mb-6">
+            <button class="filter-btn px-4 py-2 rounded bg-gray-100" data-filter="all">Всі</button>
+            <button class="filter-btn px-4 py-2 rounded" data-filter="breakfast">Сніданки</button>
+            <button class="filter-btn px-4 py-2 rounded" data-filter="lunch">Обід</button>
+            <button class="filter-btn px-4 py-2 rounded" data-filter="dinner">Вечеря</button>
+            <button class="filter-btn px-4 py-2 rounded" data-filter="snack">Перекуси</button>
+            <div class="ml-auto text-sm text-gray-500">Фокус на читабельність — мінімалізм.</div>
+        </div>
+
+        <!-- Cards grid -->
+        <section>
+            <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- Weekly planner & Diary -->
+        <section class="mt-12 p-6 rounded-lg"
+            style="background:linear-gradient(180deg, rgba(247,243,228,0.6), rgba(227,247,232,0.5));">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold">Щоденник харчування & Меню на тиждень</h2>
+                <div class="flex items-center gap-3">
+                    <input id="diaryDate" type="date" class="px-3 py-2 border rounded" />
+                    <button id="saveDiary" class="px-3 py-2 rounded border">Зберегти</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">Вибране меню</p>
+                    <div id="weeklyList" class="space-y-2 text-sm"></div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">Список меню (натисніть щоб додати)</p>
+                    <div id="menuButtons" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">Нагадування</p>
+                    <p class="text-sm text-gray-700">Регулярність: виберіть дати та зберігайте. Дані зберігаються в
+                        локальному сховищі.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top menu / top recipes -->
+        <section class="mt-12">
+            <h2 class="text-lg font-semibold mb-4">Топ рецепти</h2>
+            <div id="topRecipes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <!-- Floating add button (mobile) -->
+    <button id="floatingAdd" class="fixed bottom-5 right-5 md:hidden bg-black text-white p-3 rounded-full shadow-lg">
+        +
+    </button>
+
+    <!-- Recipe Modal -->
+    <div id="modal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <div class="absolute inset-0 bg-black/40" data-close></div>
+        <div class="relative bg-white max-w-2xl w-full mx-4 rounded-lg shadow-lg overflow-auto max-h-[90vh]">
+            <div class="p-6">
+                <button class="absolute top-4 right-4 p-2" data-close>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Recipe Modal (form) -->
+    <div id="addModal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <div class="absolute inset-0 bg-black/40" data-close></div>
+        <div class="relative bg-white max-w-xl w-full mx-4 rounded-lg shadow-lg overflow-auto max-h-[90vh]">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Додати рецепт</h3>
+                    <button class="text-sm text-gray-500" data-close>Закрити</button>
+                </div>
+                <form id="addForm" class="space-y-3">
+                    <div>
+                        <label class="text-sm">Назва</label>
+                        <input name="title" required class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                        <label class="text-sm">Тег</label>
+                        <select name="tag" class="w-full px-3 py-2 border rounded">
+                            <option value="breakfast">Сніданки</option>
+                            <option value="lunch">Обід</option>
+                            <option value="dinner">Вечеря</option>
+                            <option value="snack">Перекуси</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm">Короткий опис / інгредієнти</label>
+                        <textarea name="ingredients" rows="4" class="w-full px-3 py-2 border rounded"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-sm">Приготування (можна HTML)</label>
+                        <textarea name="steps" rows="6" class="w-full px-3 py-2 border rounded"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-sm">URL зображення (опціонально)</label>
+                        <input name="image" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="px-4 py-2 bg-black text-white rounded" type="submit">Зберегти</button>
+                        <button type="button" data-close class="px-4 py-2 border rounded">Скасувати</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Minimal data and state */
+        const defaultRecipes = [
+            {
+                id: crypto.randomUUID(),
+                title: 'Рисова запіканка (класична, ніжна)',
+                tag: 'breakfast',
+                image: 'https://images.unsplash.com/photo-1523986371872-9d3ba2e2f642?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=1',
+                ingredients: `• Рис — 1 склянка\n• Молоко — 2 склянки\n• Яйця — 2 шт.\n• Цукор — 3–4 ст. л.\n• Вершкове масло — 30 г\n• Ванільний цукор — 1 ч. л.\n• Сіль — дрібка\n• Родзинки — 40–50 г\n• Сметана для подачі — за бажанням`,
+                steps: `1) Промити рис.\n2) Завантажити в чашу мультиварки.\nРежим: «Каша». Час: 20–25 хв.\n\n3) Змішати яйця, цукор, ваніль. Додати до рису.\n\n4) Запікати у режимі "Випічка" 35–45 хв.\n\nПоради: додати 1 яйце для щільнішої структури.`
+            },
+            // sample extra
+            {
+                id: crypto.randomUUID(),
+                title: 'Йогуртові панкейки з бананом',
+                tag: 'breakfast',
+                image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=2',
+                ingredients: '...',
+                steps: '...'
+            }
+        ];
+
+        let recipes = JSON.parse(localStorage.getItem('recipes_v1') || 'null') || defaultRecipes;
+        const recipesGrid = document.getElementById('recipesGrid');
+        const topRecipes = document.getElementById('topRecipes');
+        const menuButtons = document.getElementById('menuButtons');
+        const weeklyList = document.getElementById('weeklyList');
+
+        function save() { localStorage.setItem('recipes_v1', JSON.stringify(recipes)); }
+
+        function createCard(r) {
+            const el = document.createElement('article');
+            el.className = 'rounded-lg border overflow-hidden shadow-sm bg-white';
+            el.innerHTML = `
+        <img alt="${escapeHtml(r.title)}" class="card-img" src="${r.image || 'https://via.placeholder.com/800x600?text=No+Image'}" />
+        <div class="p-4">
+          <h3 class="font-semibold text-sm mb-2">${escapeHtml(r.title)}</h3>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-600">${tagLabel(r.tag)}</span>
+            <button class="open-btn text-sm px-2 py-1 border rounded" data-id="${r.id}">Переглянути</button>
+          </div>
+        </div>
+      `;
+            return el;
+        }
+
+        function renderRecipes(filter = 'all') {
+            recipesGrid.innerHTML = '';
+            const list = recipes.filter(r => filter === 'all' ? true : r.tag === filter);
+            if (!list.length) {
+                recipesGrid.innerHTML = '<p class="text-sm text-gray-600">Рецепти відсутні для цього фільтру.</p>';
+                return;
+            }
+            list.forEach(r => recipesGrid.appendChild(createCard(r)));
+            // attach open handlers
+            document.querySelectorAll('.open-btn').forEach(b => b.addEventListener('click', e => openModal(e.target.dataset.id)));
+            // build menu buttons
+            renderMenuButtons(list);
+        }
+
+        function renderTop() {
+            topRecipes.innerHTML = '';
+            // simple: take first 3
+            recipes.slice(0, 3).forEach(r => {
+                const c = document.createElement('div');
+                c.className = 'rounded-lg p-4 border';
+                c.innerHTML = `<h4 class="font-semibold">${escapeHtml(r.title)}</h4><p class="text-sm text-gray-600 mt-2">${escapeHtml(r.tag)}</p>`;
+                topRecipes.appendChild(c);
+            });
+        }
+
+        function renderMenuButtons(list) {
+            menuButtons.innerHTML = '';
+            list.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'px-3 py-2 border rounded text-sm';
+                btn.textContent = r.title;
+                btn.addEventListener('click', () => addToWeekly(r));
+                menuButtons.appendChild(btn);
+            });
+        }
+
+        function addToWeekly(r) {
+            const item = document.createElement('div');
+            item.className = 'p-2 border rounded flex items-center justify-between';
+            const span = document.createElement('div');
+            span.innerHTML = `<div class="font-medium text-sm">${escapeHtml(r.title)}</div><div class="text-xs text-gray-600">${tagLabel(r.tag)}</div>`;
+            const del = document.createElement('button');
+            del.className = 'text-sm text-red-500'; del.textContent = 'Видалити';
+            del.addEventListener('click', () => { item.remove(); saveWeekly(); });
+            item.appendChild(span); item.appendChild(del);
+            weeklyList.appendChild(item);
+            saveWeekly();
+        }
+
+        function saveWeekly() {
+            const items = Array.from(weeklyList.children).map(n => ({ html: n.innerHTML }));
+            localStorage.setItem('weekly_v1', JSON.stringify(items));
+        }
+
+        function loadWeekly() {
+            const items = JSON.parse(localStorage.getItem('weekly_v1') || 'null');
+            if (!items) return;
+            weeklyList.innerHTML = '';
+            items.forEach(i => { const d = document.createElement('div'); d.className = 'p-2 border rounded flex items-center justify-between'; d.innerHTML = i.html; weeklyList.appendChild(d); d.querySelector('button')?.addEventListener('click', () => { d.remove(); saveWeekly(); }); });
+        }
+
+        function openModal(id) {
+            const r = recipes.find(x => x.id === id); if (!r) return;
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+        <img src="${r.image || 'https://via.placeholder.com/1200x600?text=No+Image'}" class="w-full rounded mb-4 object-cover max-h-48" />
+        <h3 class="text-xl font-semibold mb-2">${escapeHtml(r.title)}</h3>
+        <div class="text-sm text-gray-700 whitespace-pre-line">${escapeHtml(r.ingredients)}</div>
+        <hr class="my-4" />
+        <div class="text-sm text-gray-800 whitespace-pre-line">${escapeHtml(r.steps)}</div>
+      `;
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        }
+
+        function closeModals() {
+            document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex');
+            document.getElementById('addModal').classList.add('hidden'); document.getElementById('addModal').classList.remove('flex');
+        }
+
+        // helpers
+        function tagLabel(tag) {
+            return ({ breakfast: 'Сніданок', lunch: 'Обід', dinner: 'Вечеря', snack: 'Перекус' }[tag] || tag);
+        }
+        function escapeHtml(text) { return (text || '').toString().replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'); }
+
+        // Add recipe flow
+        document.getElementById('addRecipeBtn').addEventListener('click', () => openAdd());
+        document.getElementById('mobileAddBtn').addEventListener('click', () => openAdd());
+        document.getElementById('floatingAdd').addEventListener('click', () => openAdd());
+
+        function openAdd() {
+            const m = document.getElementById('addModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        }
+
+        document.querySelectorAll('[data-close]').forEach(n => n.addEventListener('click', closeModals));
+
+        document.getElementById('addForm').addEventListener('submit', function (e) {
+            e.preventDefault(); const f = new FormData(e.target);
+            const obj = { id: crypto.randomUUID(), title: f.get('title'), tag: f.get('tag'), image: f.get('image'), ingredients: f.get('ingredients'), steps: f.get('steps') };
+            recipes.unshift(obj); save(); renderRecipes(currentFilter); renderTop(); closeModals(); e.target.reset();
+        });
+
+        // Filters
+        let currentFilter = 'all';
+        document.querySelectorAll('.filter-btn').forEach(b => b.addEventListener('click', (ev) => {
+            currentFilter = ev.currentTarget.dataset.filter || 'all';
+            document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('bg-gray-100'));
+            ev.currentTarget.classList.add('bg-gray-100');
+            renderRecipes(currentFilter);
+        }));
+
+        // mobile menu
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => document.getElementById('mobileMenu').classList.toggle('hidden'));
+
+        // close modal on ESC
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
+
+        // modal backdrop click handled by data-close above
+
+        // Diary save
+        document.getElementById('saveDiary').addEventListener('click', () => {
+            const date = document.getElementById('diaryDate').value; if (!date) return alert('Оберіть дату.');
+            const items = Array.from(weeklyList.children).map(n => ({ html: n.innerHTML }));
+            localStorage.setItem('diary_' + date, JSON.stringify(items));
+            alert('Збережено для ' + date);
+        });
+
+        // load
+        function init() { renderRecipes(); renderTop(); loadWeekly(); }
+        init();
+
+    </script>
+    <!-- Admin Profile -->
+    <section id="admin-profile" class="max-w-xl mx-auto mt-16">
+        <h2 class="text-2xl font-bold mb-4">Адмін-профіль</h2>
+        <form id="admin-login" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium">Логін</label>
+                <input type="text" id="admin-username" class="w-full border p-2 rounded" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Пароль</label>
+                <input type="password" id="admin-password" class="w-full border p-2 rounded" />
+            </div>
+            <button class="bg-green-600 text-white px-4 py-2 rounded" type="submit">Увійти</button>
+        </form>
+    </section>
+
+    <!-- Weekly Menu & Diary -->
+    <section id="food-diary" class="max-w-4xl mx-auto mt-20">
+        <h2 class="text-3xl font-bold mb-6">Щоденник харчування & Меню на тиждень</h2>
+
+        <!-- Manage dishes -->
+        <div class="mb-10">
+            <h3 class="text-xl font-semibold mb-3">Список страв</h3>
+            <div class="flex gap-2 mb-4">
+                <input id="new-dish" class="border p-2 flex-1 rounded" placeholder="Нова страва" />
+                <button id="add-dish" class="bg-yellow-500 px-4 py-2 rounded">Додати</button>
+            </div>
+            <ul id="dish-list" class="space-y-2"></ul>
+        </div>
+
+        <!-- Weekly menu builder -->
+        <div>
+            <h3 class="text-xl font-semibold mb-3">Формування меню</h3>
+            <div class="flex gap-3 mb-4">
+                <select id="week-day" class="border p-2 rounded">
+                    <option>Понеділок</option>
+                    <option>Вівторок</option>
+                    <option>Середа</option>
+                    <option>Четвер</option>
+                    <option>Пʼятниця</option>
+                    <option>Субота</option>
+                    <option>Неділя</option>
+                </select>
+                <select id="dish-select" class="border p-2 rounded"></select>
+                <button id="add-to-day" class="bg-green-600 text-white px-4 py-2 rounded">Додати в день</button>
+            </div>
+            <div id="weekly-plan" class="border rounded p-4 bg-gray-50"></div>
+        </div>
+    </section>
+
+    <!-- Top Recipes Section -->
+    <section id="top-recipes" class="max-w-5xl mx-auto mt-20 mb-20">
+        <h2 class="text-3xl font-bold mb-6">Топ рецепти</h2>
+        <div id="top-recipes-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+</body>
+
+</html>
