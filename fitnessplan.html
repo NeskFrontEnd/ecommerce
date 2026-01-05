@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Dashboard - Vanilla</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        zinc: {
+                            950: '#09090b',
+                            900: '#18181b',
+                            800: '#27272a',
+                            700: '#3f3f46',
+                            500: '#71717a',
+                            400: '#a1a1aa',
+                        },
+                        lime: {
+                            300: '#bef264',
+                            400: '#a3e635',
+                            900: '#365314',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+
+        /* Utilities */
+        .hidden-screen {
+            display: none !important;
+        }
+
+        .active-tab {
+            background-color: #27272a;
+            color: white;
+        }
+
+        .inactive-tab {
+            color: #71717a;
+        }
+
+        .active-tab-music {
+            background-color: #27272a;
+            color: #a3e635;
+        }
+
+        /* Animations */
+        @keyframes pulse-border {
+            0% {
+                border-color: rgba(163, 230, 53, 0.3);
+                box-shadow: 0 0 0 rgba(163, 230, 53, 0);
+            }
+
+            50% {
+                border-color: rgba(163, 230, 53, 0.6);
+                box-shadow: 0 0 20px rgba(163, 230, 53, 0.2);
+            }
+
+            100% {
+                border-color: rgba(163, 230, 53, 0.3);
+                box-shadow: 0 0 0 rgba(163, 230, 53, 0);
+            }
+        }
+
+        .timer-running {
+            animation: pulse-border 2s infinite;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col">
+
+    <!-- SCREEN 1: CREATE WORKOUT -->
+    <div id="screen-create" class="flex-1 flex items-center justify-center p-4 bg-zinc-950 overflow-y-auto">
+        <div class="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden my-8">
+            <div class="border-b border-zinc-800 p-8 bg-zinc-900/50 backdrop-blur-xl">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-3 bg-lime-400 rounded-xl text-zinc-950">
+                        <i data-lucide="dumbbell"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-black tracking-tight text-white">New Session</h1>
+                        <p class="text-zinc-400 text-lg">Plan your training ritual</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="text-zinc-400 uppercase text-xs font-bold tracking-wider">Day</label>
+                        <select id="input-day"
+                            class="w-full h-14 text-lg bg-zinc-950 border border-zinc-800 rounded-2xl px-4 focus:outline-none focus:border-lime-400 text-white">
+                            <option>Monday</option>
+                            <option>Tuesday</option>
+                            <option>Wednesday</option>
+                            <option>Thursday</option>
+                            <option>Friday</option>
+                            <option>Saturday</option>
+                            <option>Sunday</option>
+                        </select>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-zinc-400 uppercase text-xs font-bold tracking-wider">Workout Name</label>
+                        <input id="input-name" type="text" value="Custom Workout"
+                            class="w-full h-14 text-lg bg-zinc-950 border border-zinc-800 rounded-2xl px-4 focus:outline-none focus:border-lime-400 text-white placeholder:text-zinc-600">
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="text-zinc-400 uppercase text-xs font-bold tracking-wider">Exercise List</label>
+                        <button onclick="app.addCreateExercise()"
+                            class="text-lime-400 hover:text-lime-300 text-sm font-bold flex items-center gap-1">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Movement
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Exercise Builder List -->
+                    <div id="create-exercise-list"
+                        class="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+
+                <button onclick="app.startWorkout()"
+                    class="w-full h-16 text-xl font-bold rounded-2xl bg-lime-400 text-zinc-950 hover:bg-lime-300 transition-all flex items-center justify-center gap-2">
+                    Start Training <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: DASHBOARD -->
+    <div id="screen-dashboard" class="hidden-screen h-screen flex flex-col bg-zinc-950 text-white overflow-hidden">
+
+        <!-- Header -->
+        <header
+            class="h-20 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <button onclick="app.goBack()"
+                    class="p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-zinc-800 transition-colors">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div>
+                    <h1 id="header-title" class="text-xl font-black uppercase tracking-tight">WORKOUT NAME</h1>
+                    <p id="header-day" class="text-xs text-lime-400 font-bold uppercase tracking-widest">DAY</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-800">
+                    <i data-lucide="clock" class="text-lime-400 w-4 h-4"></i>
+                    <span id="session-timer" class="font-mono font-bold text-lg">00:00</span>
+                </div>
+                <button onclick="app.goBack()"
+                    class="bg-lime-400 text-zinc-950 hover:bg-lime-300 font-bold px-6 py-2 rounded-xl hidden md:flex transition-colors">
+                    End Workout
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="flex-1 p-4 md:p-6 overflow-hidden">
+            <div class="flex flex-col md:flex-row h-full gap-4">
+
+                <!-- LEFT ZONE (75%) -->
+                <div class="flex-1 flex flex-col gap-4 md:basis-3/4 md:max-w-[75%]">
+
+                    <!-- Top: Media Module -->
+                    <div
+                        class="flex-1 min-h-[300px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden flex flex-col shadow-lg">
+                        <!-- Tabs -->
+                        <div class="p-2">
+                            <div class="bg-zinc-950/50 p-1 rounded-2xl inline-flex w-full">
+                                <button onclick="app.setMediaTab('video')" id="tab-btn-video"
+                                    class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 active-tab">
+                                    <i data-lucide="video" class="w-4 h-4"></i> Video
+                                </button>
+                                <button onclick="app.setMediaTab('music')" id="tab-btn-music"
+                                    class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300">
+                                    <i data-lucide="music" class="w-4 h-4"></i> Music
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div id="media-content-video"
+                            class="flex-1 relative group cursor-pointer overflow-hidden bg-zinc-950">
+                            <!-- Placeholder Video Image -->
+                            <iframe width="100%" height="100%"
+                                src="https://www.youtube.com/embed/videoseries?si=qWwFsgpklaN017Qx&amp;list=PLBhrQo_PanQTXs9Nu08JEPYAEh55uJ189"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+
+                        <div id="media-content-music"
+                            class="hidden-screen flex-1 flex flex-col p-6 items-center justify-center text-center bg-zinc-900">
+                            <iframe allow="autoplay *; encrypted-media *;" frameborder="0" height="100%"
+                                style="width:100%;overflow:hidden;background:transparent;"
+                                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                                src="https://embed.music.apple.com/ua/playlist/workout/pl.u-E1Z3T9Y97P3?l=uk"></iframe>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: Timer & Stats -->
+                    <div class="flex-1/2 min-h-0 flex flex-col md:flex-row gap-4">
+
+                        <!-- Timer -->
+                        <div id="timer-card"
+                            class="flex-1 min-h-[300px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg flex flex-col transition-all duration-300">
+                            <div class="flex-1 flex flex-col items-center justify-center p-4">
+                                <div id="timer-display"
+                                    class="text-7xl font-black font-mono tracking-tighter text-white mb-8 flex items-baseline">
+                                    00:00<span class="text-3xl text-zinc-500 ml-2">.00</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-4 w-full max-w-sm">
+                                    <button onclick="app.resetTimer()"
+                                        class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors">
+                                        <i data-lucide="rotate-ccw"></i>
+                                    </button>
+                                    <button onclick="app.toggleTimer()" id="timer-btn-main"
+                                        class="h-16 rounded-2xl text-xl font-bold shadow-lg bg-lime-400 hover:bg-lime-300 text-zinc-950 flex items-center justify-center transition-colors">
+                                        <i data-lucide="play" class="fill-current w-7 h-7"></i>
+                                    </button>
+                                    <button
+                                        class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors">
+                                        <i data-lucide="history"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div
+                            class="flex-1 min-h-[200px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg relative">
+                            <div class="p-6 h-full flex flex-row items-center justify-between gap-4">
+                                <!-- Ring -->
+                                <div class="relative w-32 h-32 flex-shrink-0 flex items-center justify-center">
+                                    <svg class="transform -rotate-90 w-full h-full">
+                                        <circle cx="64" cy="64" r="50" stroke="#27272a" stroke-width="10"
+                                            fill="transparent"></circle>
+                                        <circle id="stats-ring" cx="64" cy="64" r="50" stroke="#a3e635"
+                                            stroke-width="10" fill="transparent" stroke-dasharray="314.159"
+                                            stroke-dashoffset="314.159" stroke-linecap="round"
+                                            class="transition-all duration-1000 ease-in-out"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span id="stats-percent" class="text-2xl font-black text-white">0%</span>
+                                        <span class="text-[10px] text-zinc-500 font-bold uppercase mt-1">Progress</span>
+                                    </div>
+                                </div>
+
+                                <!-- List -->
+                                <div class="flex-1 space-y-4">
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-2xl bg-zinc-950/50 border border-zinc-800/50">
+                                        <div class="p-2 bg-zinc-800 rounded-xl text-blue-400"><i
+                                                data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+                                        <div>
+                                            <p class="text-xs text-zinc-500 uppercase font-bold">Exercises</p>
+                                            <p id="stats-exercises" class="text-lg font-bold text-white leading-none">0
+                                                / 0</p>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-3 p-3 rounded-2xl bg-zinc-950/50 border border-zinc-800/50">
+                                        <div class="p-2 bg-zinc-800 rounded-xl text-orange-400"><i data-lucide="clock"
+                                                class="w-5 h-5"></i></div>
+                                        <div>
+                                            <p class="text-xs text-zinc-500 uppercase font-bold">Duration</p>
+                                            <p id="stats-duration" class="text-lg font-bold text-white leading-none">
+                                                00:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- RIGHT ZONE (25%) - Workout Plan -->
+                <div
+                    class="md:basis-1/4 md:max-w-[25%] h-full min-h-[400px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg flex flex-col">
+                    <div
+                        class="bg-zinc-950/50 border-b border-zinc-800 py-4 px-6 flex flex-row items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-lime-400 rounded-lg text-zinc-950"><i data-lucide="edit-2"
+                                    class="w-4 h-4"></i></div>
+                            <h3 class="text-white text-lg font-bold">Plan</h3>
+                        </div>
+                        <button class="text-zinc-500 hover:text-white p-2 rounded-xl hover:bg-zinc-800"><i
+                                data-lucide="eye"></i></button>
+                    </div>
+
+                    <div id="exercise-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                        <!-- Dynamic Content Here -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- APP SCRIPT -->
+    <script>
+        // --- DATA & STATE ---
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        const DEFAULT_PRESET = [
+            { id: 'p1', name: 'Squats', sets: 3, reps: 15, completedSets: 0, completed: false },
+            { id: 'p2', name: 'Push Ups', sets: 3, reps: 12, completedSets: 0, completed: false },
+            { id: 'p3', name: 'Lunges', sets: 3, reps: 20, completedSets: 0, completed: false }
+        ];
+
+        const app = {
+            state: {
+                exercises: [], // The active workout exercises
+                createExercises: JSON.parse(JSON.stringify(DEFAULT_PRESET)), // The builder list
+                workoutName: '',
+                workoutDay: '',
+                sessionTime: 0,
+                timerTime: 0,
+                timerRunning: false,
+                sessionTimerId: null,
+                timerIntervalId: null,
+                activeTab: 'video'
+            },
+
+            // --- INIT ---
+            init: function () {
+                this.renderCreateExercises();
+                lucide.createIcons();
+            },
+
+            // --- CREATE WORKOUT LOGIC ---
+            addCreateExercise: function () {
+                this.state.createExercises.push({
+                    id: generateId(),
+                    name: '',
+                    sets: 3,
+                    reps: 10,
+                    completedSets: 0,
+                    completed: false
+                });
+                this.renderCreateExercises();
+            },
+
+            removeCreateExercise: function (id) {
+                this.state.createExercises = this.state.createExercises.filter(ex => ex.id !== id);
+                this.renderCreateExercises();
+            },
+
+            updateCreateExercise: function (id, field, value) {
+                const ex = this.state.createExercises.find(e => e.id === id);
+                if (ex) {
+                    if (field === 'sets' || field === 'reps') {
+                        ex[field] = parseInt(value) || 0;
+                    } else {
+                        ex[field] = value;
+                    }
+                }
+                // We don't re-render entire list on input to avoid losing focus, 
+                // but for sets/reps buttons we might need to update display.
+                // However, since we use native inputs for text, let's keep it simple.
+                // If using +/- buttons, we update display manually.
+
+                // For this implementation, I'll re-render only if structure changes, 
+                // otherwise I assume the input value is handled by DOM.
+                // Actually, to keep state in sync for +/- buttons, I will re-render.
+                // For text input, I'll attach onchange/oninput and not re-render.
+            },
+
+            renderCreateExercises: function () {
+                const container = document.getElementById('create-exercise-list');
+                container.innerHTML = '';
+
+                this.state.createExercises.forEach((ex, index) => {
+                    const html = `
+                    <div class="flex flex-col md:flex-row items-center gap-3 bg-zinc-950/50 p-3 rounded-2xl border border-zinc-800/50 group hover:border-zinc-700 transition-colors">
+                        <span class="text-zinc-600 font-mono w-6 text-center hidden md:block">${index + 1}</span>
+                        
+                        <!-- Name Input -->
+                        <input 
+                            type="text" 
+                            value="${ex.name}" 
+                            oninput="app.updateCreateExercise('${ex.id}', 'name', this.value)"
+                            class="flex-1 w-full md:w-auto h-12 bg-transparent border-b md:border-0 border-zinc-800 focus:outline-none text-lg placeholder:text-zinc-700 text-white"
+                            placeholder="Exercise Name"
+                        >
+                        
+                        <div class="flex w-full md:w-auto justify-between md:justify-start gap-3">
+                            <!-- Sets -->
+                            <div class="flex items-center gap-2 bg-zinc-900 rounded-xl px-2 h-10 border border-zinc-800">
+                                <button onclick="app.adjustCreateVal('${ex.id}', 'sets', -1)" class="text-zinc-500 hover:text-white p-1"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                                <span class="w-8 text-center font-mono font-bold text-lime-400">${ex.sets}</span>
+                                <span class="text-[10px] text-zinc-600 font-bold uppercase mr-1">Sets</span>
+                                <button onclick="app.adjustCreateVal('${ex.id}', 'sets', 1)" class="text-zinc-500 hover:text-white p-1"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                            </div>
+
+                            <!-- Reps -->
+                            <div class="flex items-center gap-2 bg-zinc-900 rounded-xl px-2 h-10 border border-zinc-800">
+                                <button onclick="app.adjustCreateVal('${ex.id}', 'reps', -1)" class="text-zinc-500 hover:text-white p-1"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                                <span class="w-8 text-center font-mono font-bold text-blue-400">${ex.reps}</span>
+                                <span class="text-[10px] text-zinc-600 font-bold uppercase mr-1">Reps</span>
+                                <button onclick="app.adjustCreateVal('${ex.id}', 'reps', 1)" class="text-zinc-500 hover:text-white p-1"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                            </div>
+
+                            <!-- Remove -->
+                            <button onclick="app.removeCreateExercise('${ex.id}')" class="text-zinc-700 hover:text-red-400 hover:bg-red-400/10 rounded-xl h-10 w-10 flex items-center justify-center">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+                lucide.createIcons();
+            },
+
+            adjustCreateVal: function (id, field, delta) {
+                const ex = this.state.createExercises.find(e => e.id === id);
+                if (ex) {
+                    const newVal = Math.max(1, ex[field] + delta);
+                    this.updateCreateExercise(id, field, newVal);
+                    this.renderCreateExercises(); // Re-render to show new number
+                }
+            },
+
+            // --- NAVIGATION ---
+            startWorkout: function () {
+                // Get inputs
+                const day = document.getElementById('input-day').value;
+                const name = document.getElementById('input-name').value;
+
+                // Filter empty exercises
+                const validExercises = this.state.createExercises.filter(e => e.name.trim() !== '');
+
+                if (validExercises.length === 0) {
+                    alert('Please add at least one exercise with a name.');
+                    return;
+                }
+
+                // Set state
+                this.state.workoutName = name;
+                this.state.workoutDay = day;
+                // Deep copy to ensure independence
+                this.state.exercises = JSON.parse(JSON.stringify(validExercises));
+
+                // Update DOM Header
+                document.getElementById('header-title').innerText = name;
+                document.getElementById('header-day').innerText = day;
+
+                // Switch Screens
+                document.getElementById('screen-create').classList.add('hidden-screen');
+                document.getElementById('screen-dashboard').classList.remove('hidden-screen');
+
+                // Initialize modules
+                this.renderExercises();
+                this.updateStats();
+                this.startSessionTimer();
+
+                // Re-init icons for new screen
+                setTimeout(() => lucide.createIcons(), 50);
+            },
+
+
+            goBack: function () {
+                // Stop Timers
+                clearInterval(this.state.sessionTimerId);
+                clearInterval(this.state.timerIntervalId);
+                this.state.timerRunning = false;
+                this.state.timerTime = 0;
+                this.state.sessionTime = 0;
+                this.updateTimerDisplay();
+                document.getElementById('timer-card').classList.remove('timer-running');
+
+                // Switch Screens
+                document.getElementById('screen-dashboard').classList.add('hidden-screen');
+                document.getElementById('screen-create').classList.remove('hidden-screen');
+            },
+
+            // --- WORKOUT PLAN LOGIC ---
+            renderExercises: function () {
+                const container = document.getElementById('exercise-list');
+                container.innerHTML = '';
+
+                // Find first incomplete for active marking
+                const firstIncompleteIdx = this.state.exercises.findIndex(ex => !ex.completed);
+
+                this.state.exercises.forEach((ex, index) => {
+                    const isActive = !ex.completed && index === firstIncompleteIdx;
+
+                    // Card Styling
+                    let cardClasses = "border rounded-2xl p-4 transition-all ";
+                    if (ex.completed) {
+                        cardClasses += "border-lime-900/30 bg-lime-900/5 opacity-60";
+                    } else if (isActive) {
+                        cardClasses += "bg-zinc-900 border-lime-400/30 ring-1 ring-lime-400/50";
+                    } else {
+                        cardClasses += "bg-zinc-950 border-zinc-800";
+                    }
+
+                    // Header
+                    let html = `
+                    <div class="${cardClasses}" id="ex-card-${ex.id}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-lg font-bold ${ex.completed ? 'text-lime-400 line-through' : 'text-white'}">${ex.name}</h4>
+                                    ${isActive ? '<span class="bg-lime-400 text-zinc-950 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Active</span>' : ''}
+                                </div>
+                                <span class="text-sm font-medium text-zinc-400 mt-1 block">${ex.sets} × ${ex.reps}</span>
+                            </div>
+                            ${ex.completed ? '<div class="bg-lime-400/20 text-lime-400 p-1 rounded-full"><i data-lucide="check" class="w-4 h-4"></i></div>' : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                    `;
+
+                    // Buttons
+                    for (let i = 0; i < ex.sets; i++) {
+                        const isChecked = i < ex.completedSets;
+                        let btnClass = "h-10 min-w-[60px] px-2 rounded-xl flex items-center justify-center border-2 transition-all gap-1 cursor-pointer ";
+                        if (isChecked) {
+                            btnClass += "bg-lime-400 border-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(163,230,53,0.4)]";
+                        } else {
+                            btnClass += "bg-zinc-900 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-white";
+                        }
+
+                        // We pass the set Index
+                        html += `
+                            <button onclick="app.toggleSet('${ex.id}', ${i})" class="${btnClass}">
+                                ${isChecked ? '<i data-lucide="check" class="w-3 h-3 stroke-[4]"></i>' : ''}
+                                <span class="text-sm font-bold ${isChecked ? 'text-zinc-950' : 'text-white'}">${ex.reps}</span>
+                            </button>
+                        `;
+                    }
+
+                    html += `</div></div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+
+                lucide.createIcons();
+            },
+
+            toggleSet: function (exId, setIdx) {
+                const ex = this.state.exercises.find(e => e.id === exId);
+                if (!ex) return;
+
+                const isChecked = setIdx < ex.completedSets;
+
+                // Logic: clicking index 1 (2nd box). 
+                // If it's checked (compSets >= 2), uncheck it (compSets becomes 1).
+                // If it's unchecked, check it (compSets becomes 2).
+                if (isChecked) {
+                    ex.completedSets = setIdx;
+                } else {
+                    ex.completedSets = setIdx + 1;
+                }
+
+                // Check completion
+                ex.completed = ex.completedSets === ex.sets;
+
+                // Re-render
+                this.renderExercises();
+                this.updateStats();
+            },
+
+            // --- STATS LOGIC ---
+            updateStats: function () {
+                const total = this.state.exercises.length;
+                const completed = this.state.exercises.filter(e => e.completed).length;
+                const percent = total > 0 ? (completed / total) * 100 : 0;
+
+                // Update text
+                document.getElementById('stats-exercises').innerText = `${completed} / ${total}`;
+                document.getElementById('stats-percent').innerText = `${Math.round(percent)}%`;
+
+                // Update Ring SVG
+                const circle = document.getElementById('stats-ring');
+                const radius = 50;
+                const circumference = 2 * Math.PI * radius; // ~314
+                const offset = circumference - (percent / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+            },
+
+            // --- TIMER LOGIC (SESSION & STOPWATCH) ---
+            startSessionTimer: function () {
+                if (this.state.sessionTimerId) clearInterval(this.state.sessionTimerId);
+                this.state.sessionTimerId = setInterval(() => {
+                    this.state.sessionTime++;
+                    // Update header display
+                    const m = Math.floor(this.state.sessionTime / 60);
+                    const s = this.state.sessionTime % 60;
+                    document.getElementById('session-timer').innerText =
+                        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+                    // Update stats duration
+                    document.getElementById('stats-duration').innerText =
+                        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                }, 1000);
+            },
+
+            toggleTimer: function () {
+                const btn = document.getElementById('timer-btn-main');
+                const card = document.getElementById('timer-card');
+
+                if (this.state.timerRunning) {
+                    // Pause
+                    this.state.timerRunning = false;
+                    clearInterval(this.state.timerIntervalId);
+
+                    // Update UI
+                    btn.classList.remove('bg-red-500', 'hover:bg-red-600', 'text-white');
+                    btn.classList.add('bg-lime-400', 'hover:bg-lime-300', 'text-zinc-950');
+                    btn.innerHTML = '<i data-lucide="play" class="fill-current w-7 h-7"></i>';
+
+                    card.classList.remove('timer-running');
+                } else {
+                    // Start
+                    this.state.timerRunning = true;
+                    this.state.timerIntervalId = setInterval(() => {
+                        this.state.timerTime += 10; // add 10ms
+                        this.updateTimerDisplay();
+                    }, 10);
+
+                    // Update UI
+                    btn.classList.remove('bg-lime-400', 'hover:bg-lime-300', 'text-zinc-950');
+                    btn.classList.add('bg-red-500', 'hover:bg-red-600', 'text-white');
+                    btn.innerHTML = '<i data-lucide="pause" class="fill-current w-7 h-7"></i>';
+
+                    card.classList.add('timer-running');
+                }
+                lucide.createIcons();
+            },
+
+            resetTimer: function () {
+                this.state.timerRunning = false;
+                clearInterval(this.state.timerIntervalId);
+                this.state.timerTime = 0;
+                this.updateTimerDisplay();
+
+                // Reset UI
+                const btn = document.getElementById('timer-btn-main');
+                const card = document.getElementById('timer-card');
+
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600', 'text-white');
+                btn.classList.add('bg-lime-400', 'hover:bg-lime-300', 'text-zinc-950');
+                btn.innerHTML = '<i data-lucide="play" class="fill-current w-7 h-7"></i>';
+                card.classList.remove('timer-running');
+
+                lucide.createIcons();
+            },
+
+            updateTimerDisplay: function () {
+                const ms = this.state.timerTime;
+                const m = Math.floor(ms / 60000);
+                const s = Math.floor((ms % 60000) / 1000);
+                const cs = Math.floor((ms % 1000) / 10);
+
+                document.getElementById('timer-display').innerHTML =
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}<span class="text-3xl text-zinc-500 ml-2">.${cs.toString().padStart(2, '0')}</span>`;
+            },
+
+            // --- MEDIA TABS ---
+            setMediaTab: function (tab) {
+                const btnVideo = document.getElementById('tab-btn-video');
+                const btnMusic = document.getElementById('tab-btn-music');
+                const contentVideo = document.getElementById('media-content-video');
+                const contentMusic = document.getElementById('media-content-music');
+
+                if (tab === 'video') {
+                    // Styles
+                    btnVideo.className = "flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 active-tab";
+                    btnMusic.className = "flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300";
+
+                    // Content
+                    contentVideo.classList.remove('hidden-screen');
+                    contentMusic.classList.add('hidden-screen');
+                } else {
+                    // Styles
+                    btnVideo.className = "flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300";
+                    btnMusic.className = "flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 active-tab-music";
+
+                    // Content
+                    contentVideo.classList.add('hidden-screen');
+                    contentMusic.classList.remove('hidden-screen');
+                }
+            }
+        };
+
+        // Start
+        app.init();
+    </script>
+</body>
+
+</html>

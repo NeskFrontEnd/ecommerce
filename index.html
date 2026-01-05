@@ -57,6 +57,59 @@
             font-family: 'Space Grotesk', sans-serif;
         }
 
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b9ff66;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f3ff0b;
+        }
+
+        /* Selection Color */
+        ::selection {
+            background-color: rgb(185, 255, 102, 0.75);
+            color: black;
+        }
+
+        ::-moz-selection {
+            background-color: rgb(185, 255, 102, 0.75);
+            color: black;
+        }
+
+        /* Prevent horizontal scroll on mobile */
+        body {
+            overflow-x: hidden;
+            height: 3000px;
+        }
+
         /* Hover ефект для іконок */
         .button-card .icon-hover {
             transition: transform 0.3s ease;
@@ -65,6 +118,39 @@
 
         .button-card:hover .icon-hover {
             transform: rotate(30deg);
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                position: relative;
+                top: 0px;
+                box-shadow: 0 0 0px rgba(185, 255, 102, 0.2);
+            }
+
+            50% {
+                position: relative;
+                top: -10px;
+                box-shadow: 0 10px 10px rgba(185, 255, 102, 1);
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 3s infinite;
+        }
+
+        .button-marathon {
+            background-color: black;
+            color: white;
+            border-radius: 100px;
+            display: block;
+            transition-duration: 500ms;
+        }
+
+        .button-marathon:hover {
+            color: #b9ff66;
+
         }
     </style>
 </head>
@@ -189,12 +275,8 @@
                             <p class="font-roboto-mono font-normal text-[14px] text-white leading-[1.5] m-0">
                                 Створи персональний план тренувань під свої цілі.
                             </p>
-                            <br />
-                            <p class="font-roboto-mono font-normal text-[14px] text-white leading-[1.5] m-0">
-                                На етапі розробки.
-                            </p>
                         </div>
-                        <a href="#" class="flex items-center gap-4 mt-8 button-card">
+                        <a href="fitnessplan.html" class="flex items-center gap-4 mt-8 button-card">
                             <div class="w-[41px] h-[41px] shrink-0 icon-hover">
                                 <svg class="block w-full h-full" fill="none" preserveAspectRatio="none"
                                     viewBox="0 0 41 41">
@@ -211,13 +293,20 @@
 
                 </div>
             </section>
+            <section>
+                <div class="flex gap-6 justify-between">
+                    <a class="animate-pulse-glow button-marathon mb-20 p-4 text-center lg:w-4/12"
+                        href="marathon-design.html">marathon-design</a>
+                </div>
+
+            </section>
 
             <!-- Footer -->
             <footer class="pt-12 border-t border-black">
                 <p class="font-space-grotesk font-normal text-[18px] text-black leading-[28px] m-0">
                     © 2025 All Rights Reserved.
                 </p>
-                <a href="marathon-design.html">marathon-design</a>
+
             </footer>
 
         </div>
