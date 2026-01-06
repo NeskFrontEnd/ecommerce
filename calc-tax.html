@@ -3,217 +3,354 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Калькулятор зарплати з податками</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фінансовий інструмент ФОП</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Roboto+Mono:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'space-grotesk': ['Space Grotesk', 'sans-serif'],
-                        'roboto-mono': ['Roboto Mono', 'monospace'],
-                    },
-                    screens: {
-                        'lg': '991px',
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         body {
-            font-family: 'Roboto Mono', monospace;
+            font-family: Inter, sans-serif;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Space Grotesk', sans-serif;
+        #exportArea {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .pdf-mode {
+            display: block !important;
+            max-width: 720px;
+            margin: 0 auto;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 p-6">
-    <div class="button text-left w-full font-bold mb-6">
-        <a href="index.html">← Back</a>
-    </div>
-    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+<body class="bg-slate-100 p-4 md:p-8">
 
-        <!-- Ліва колонка -->
-        <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-2xl font-bold mb-4">Калькулятор зарплати з податками</h2>
+    <div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl grid md:grid-cols-2 overflow-hidden">
 
-            <label for="netUsd">Бажана ЗП (на руки) у USD:</label>
-            <input type="number" id="netUsd" class="w-full border p-2 mb-2" step="0.01">
+        <!-- LEFT -->
+        <div class="p-8 space-y-6">
 
-            <label for="salaryEur">Сума в EUR (виплата з податками):</label>
-            <input type="number" id="salaryEur" class="w-full border p-2 mb-2" step="0.01">
+            <h1 class="text-2xl font-semibold">Фінансовий інструмент ФОП</h1>
 
-            <label for="eurToUah">Курс EUR/UAH:</label>
-            <input type="number" id="eurToUah" class="w-full border p-2 mb-2" step="0.01">
+            <div>
+                <label class="text-xs text-slate-500">Вхідна сума (вже з податками)</label>
+                <div class="flex gap-2">
+                    <input id="incomingAmount" type="number" class="flex-1 border-b outline-none text-lg">
+                    <select id="incomingCurrency" class="border-b text-sm">
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                        <option value="UAH">UAH</option>
+                    </select>
+                </div>
+            </div>
 
-            <label for="usdToUah">Курс USD/UAH:</label>
-            <input type="number" id="usdToUah" class="w-full border p-2 mb-2" step="0.01">
+            <div>
+                <label class="text-xs text-slate-500">Бажана сума (на руки), USD</label>
+                <input id="netUsd" type="number" class="w-full border-b outline-none text-2xl font-bold">
+            </div>
 
-            <label for="taxPercent">Єдиний податок (%):</label>
-            <input type="number" id="taxPercent" class="w-full border p-2 mb-2" value="5" step="0.1">
+            <div>
+                <label class="text-xs text-slate-500">Дата курсу НБУ</label>
+                <input id="rateDate" type="date" class="border-b outline-none">
+            </div>
 
-            <label for="militaryPercent">Військовий збір (%):</label>
-            <input type="number" id="militaryPercent" class="w-full border p-2 mb-2" value="0.5" step="0.1">
+            <div class="space-y-2">
+                <div class="text-xs text-slate-500">Джерело курсу</div>
+                <div class="flex gap-2">
+                    <button onclick="setRate('nbu')" class="border px-3 py-1 rounded">НБУ</button>
+                    <button onclick="setRate('monobank')" class="border px-3 py-1 rounded">Monobank</button>
+                    <button onclick="setRate('manual')" class="border px-3 py-1 rounded">Вручну</button>
+                </div>
 
-            <label for="esvUah">ЄСВ (в грн):</label>
-            <input type="number" id="esvUah" class="w-full border p-2 mb-4" value="1760">
+                <div id="manualRates" class="hidden grid grid-cols-2 gap-4">
+                    <input id="usdManual" placeholder="USD" class="border-b outline-none">
+                    <input id="eurManual" placeholder="EUR" class="border-b outline-none">
+                </div>
 
-            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                onclick="calculate()">Розрахувати</button>
+                <div class="text-xs text-slate-400">
+                    USD: <span id="usdRate">–</span> | EUR: <span id="eurRate">–</span>
+                </div>
+            </div>
 
-            <div class="result mt-4 p-4 bg-gray-50 border rounded" id="result"></div>
+            <div class="grid grid-cols-3 gap-4">
+                <input id="taxSingle" type="number" value="5" class="border-b" placeholder="ЄП %">
+                <input id="taxMilitary" type="number" value="0.5" class="border-b" placeholder="ВЗ %">
+                <input id="taxEsv" type="number" value="1760" class="border-b" placeholder="ЄСВ ₴">
+            </div>
+
         </div>
 
-        <!-- Права колонка -->
-        <div class="bg-white p-6 rounded shadow">
-            <h3 class="text-xl font-semibold mb-4">Курси валют</h3>
+        <!-- RIGHT -->
+        <div class="bg-slate-50 p-8 space-y-6">
 
-            <label for="rateDate">Дата курсу НБУ:</label>
-            <input type="date" id="rateDate" class="w-full border p-2 mb-4">
+            <div class="bg-white p-6 rounded-xl">
+                <div class="text-xs text-slate-500">Сума для переказу на фізичну картку</div>
+                <div id="resultUah" class="text-3xl font-bold">0 ₴</div>
+                <div class="text-sm text-slate-500">≈ <span id="resultUsd">0</span> USD</div>
+            </div>
 
-            <div id="exchangeRates" class="mb-4 text-gray-800">
-                <p>Завантаження курсу...</p>
+            <div id="compareBlock" class="rounded-xl p-6">
+                <div class="text-xs text-slate-500 mb-2">
+                    A — бажана сума + податки (USD)<br>
+                    B — вхідна сума після конвертації (USD)
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="compareIcon" class="text-2xl"></div>
+                    <div id="compareValue" class="text-xl font-bold"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl">
+                <button onclick="toggleDetails()" class="underline text-sm">Показати деталі</button>
+
+                <div id="exportArea" class="hidden mt-4 space-y-3 text-sm">
+
+                    <input id="detailDate" type="date" class="border-b outline-none text-sm">
+                    <div class="font-bold" id="detailMonth"></div>
+                    <hr>
+
+                    <div><strong>Вхідна сума:</strong> <span id="dIncoming"></span></div>
+                    <div><strong>Бажана сума:</strong> <span id="dDesired"></span></div>
+                    <hr>
+
+                    <div><strong>Курс НБУ:</strong> <span id="dNbu"></span></div>
+                    <div><strong>Курс Monobank:</strong> <span id="dMono"></span></div>
+                    <div><strong>Кроскурс EUR/USD:</strong> <span id="dCross"></span></div>
+                    <div><strong>Джерело курсу:</strong> <span id="dRateSource"></span></div>
+                    <hr>
+
+                    <div class="font-bold">Податки</div>
+                    <div>ЄП: <span id="dSingle"></span></div>
+                    <div>ВЗ: <span id="dMilitary"></span></div>
+                    <div>ЄСВ: <span id="dEsv"></span></div>
+                    <hr>
+
+                    <div><strong>Загальна сума (A):</strong> <span id="dTotal"></span></div>
+                    <div><strong>Сума податків:</strong> <span id="dTaxTotal"></span></div>
+                    <hr>
+
+                    <div class="font-bold">Додаткові поля</div>
+                    <div>Остача ФОП: <input id="fopBalance" class="border-b w-24"></div>
+                    <div>Остача фіз. особи: <input id="personalBalance" class="border-b w-24"></div>
+                    <hr>
+
+                    <div><strong>Остача ФОП оновлено:</strong> <span id="dFopUpdated"></span></div>
+                    <div><strong>Сума для переказу:</strong> <span id="dTransfer"></span></div>
+                    <hr>
+
+                    <div class="text-xs text-slate-500">
+                        Сформовано: <span id="generatedAt"></span>
+                    </div>
+
+                </div>
             </div>
 
             <div class="flex gap-2">
-                <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                    onclick="fetchRates()">Оновити курс (сьогодні)</button>
-                <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
-                    onclick="fetchRatesByDate()">Отримати курс за дату</button>
+                <button onclick="exportPDF()" class="border px-4 py-2 rounded">PDF</button>
+                <button onclick="exportExcel()" class="border px-4 py-2 rounded">Excel</button>
             </div>
+
         </div>
     </div>
 
     <script>
+        const state = {
+            rate: 'nbu',
+            rates: { usd: 0, eur: 0 },
+            nbuFixed: { usd: 0, eur: 0 },
+            mono: { usd: 0, eur: 0 }
+        };
+
+        let calc = {};
+
+        function getFormattedDateTime() {
+            return new Date().toLocaleString('uk-UA', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
         async function fetchRates() {
-            const exchangeEl = document.getElementById('exchangeRates');
-            exchangeEl.innerHTML = 'Завантаження...';
+            const d = rateDate.value;
+            let url = 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json';
+            if (d) {
+                const f = d.split('-').reverse().join('.');
+                url = `https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${f}&json`;
+            }
+            const data = await fetch(url).then(r => r.json());
+
+            state.rates.usd = data.find(x => x.cc === 'USD')?.rate;
+            state.rates.eur = data.find(x => x.cc === 'EUR')?.rate;
+            state.nbuFixed = { ...state.rates };
 
             try {
-                const [nbu, mono] = await Promise.all([
-                    fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json').then(res => res.json()),
-                    fetch('https://api.monobank.ua/bank/currency').then(res => res.json())
-                ]);
+                const mono = await fetch('https://api.monobank.ua/bank/currency').then(r => r.json());
+                state.mono.usd = mono.find(x => x.currencyCodeA === 840 && x.currencyCodeB === 980)?.rateBuy;
+                state.mono.eur = mono.find(x => x.currencyCodeA === 978 && x.currencyCodeB === 980)?.rateBuy;
+            } catch { }
 
-                const nbuEur = nbu.find(x => x.cc === 'EUR');
-                const nbuUsd = nbu.find(x => x.cc === 'USD');
-
-                const monoEur = mono.find(x => x.currencyCodeA === 978 && x.currencyCodeB === 980);
-                const monoUsd = mono.find(x => x.currencyCodeA === 840 && x.currencyCodeB === 980);
-
-                exchangeEl.innerHTML = `
-          <strong>Курс НБУ:</strong><br>
-          EUR: ${nbuEur.rate.toFixed(2)} грн<br>
-          USD: ${nbuUsd.rate.toFixed(2)} грн<br>
-          <small>Курс на дату: ${nbuEur.exchangedate} | Сьогодні: ${new Date().toLocaleDateString('uk-UA')}</small><br><br>
-
-          <strong>Курс Monobank:</strong><br>
-          EUR: ${monoEur.rateBuy.toFixed(2)} / ${monoEur.rateSell.toFixed(2)} грн<br>
-          USD: ${monoUsd.rateBuy.toFixed(2)} / ${monoUsd.rateSell.toFixed(2)} грн<br>
-          <small>Оновлено: зараз</small>
-        `;
-
-                document.getElementById('eurToUah').value = nbuEur.rate.toFixed(2);
-                document.getElementById('usdToUah').value = nbuUsd.rate.toFixed(2);
-            } catch (err) {
-                exchangeEl.innerHTML = '<span class="text-red-600">Помилка завантаження курсу.</span>';
-            }
+            update();
         }
 
-        async function fetchRatesByDate() {
-            const dateInput = document.getElementById('rateDate').value;
-            const exchangeEl = document.getElementById('exchangeRates');
-
-            if (!dateInput) {
-                exchangeEl.innerHTML = '<span class="text-red-600">Виберіть дату.</span>';
-                return;
-            }
-
-            const formatted = dateInput.replace(/-/g, ''); // yyyy-mm-dd -> yyyymmdd
-
-            exchangeEl.innerHTML = 'Завантаження курсу за дату...';
-
-            try {
-                const response = await fetch(`https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=${formatted}&json`);
-                const data = await response.json();
-
-                const eur = data.find(x => x.cc === 'EUR');
-                const usd = data.find(x => x.cc === 'USD');
-
-                exchangeEl.innerHTML = `
-          <strong>Курс НБУ на ${eur.exchangedate}:</strong><br>
-          EUR: ${eur.rate.toFixed(2)} грн<br>
-          USD: ${usd.rate.toFixed(2)} грн<br>
-          <small>Сьогодні: ${new Date().toLocaleDateString('uk-UA')}</small><br><br>
-          <em>⚠️ Monobank доступний лише для поточного дня.</em>
-        `;
-
-                document.getElementById('eurToUah').value = eur.rate.toFixed(2);
-                document.getElementById('usdToUah').value = usd.rate.toFixed(2);
-            } catch (err) {
-                exchangeEl.innerHTML = '<span class="text-red-600">Не вдалося отримати курс за вибрану дату.</span>';
-            }
+        function setRate(r) {
+            state.rate = r;
+            manualRates.classList.toggle('hidden', r !== 'manual');
+            if (r !== 'manual') { fetchRates(); }
+            else { update(); }
         }
 
-        function calculate() {
-            const netUsd = parseFloat(document.getElementById('netUsd').value);
-            const salaryEur = parseFloat(document.getElementById('salaryEur').value);
-            const eurToUah = parseFloat(document.getElementById('eurToUah').value);
-            const usdToUah = parseFloat(document.getElementById('usdToUah').value);
-            const taxPercent = parseFloat(document.getElementById('taxPercent').value);
-            const militaryPercent = parseFloat(document.getElementById('militaryPercent').value);
-            const esvUah = parseFloat(document.getElementById('esvUah').value);
+        function getRates() {
+            if (state.rate === 'manual') {
+                return { usd: +usdManual.value || state.rates.usd, eur: +eurManual.value || state.rates.eur };
+            }
+            if (state.rate === 'monobank' && state.mono.usd) {
+                return state.mono;
+            }
+            return state.rates;
+        }
 
-            if (isNaN(salaryEur) || isNaN(eurToUah) || isNaN(usdToUah) || isNaN(netUsd)) {
-                document.getElementById('result').innerHTML = 'Будь ласка, введіть усі значення.';
-                return;
+        function update() {
+            const r = getRates(); if (!r.usd) return;
+
+            usdRate.textContent = r.usd.toFixed(2);
+            eurRate.textContent = r.eur.toFixed(2);
+
+            const incoming = +incomingAmount.value || 0;
+            const curr = incomingCurrency.value;
+
+            let incomingUsd = 0, incomingUah = 0;
+            if (curr === 'EUR') { incomingUsd = incoming * (r.eur / r.usd); incomingUah = incoming * r.eur; }
+            if (curr === 'USD') { incomingUsd = incoming; incomingUah = incoming * r.usd; }
+            if (curr === 'UAH') { incomingUsd = incoming / r.usd; incomingUah = incoming; }
+
+            const net = +netUsd.value || 0;
+            const single = net * taxSingle.value / 100;
+            const military = net * taxMilitary.value / 100;
+            const esv = taxEsv.value / r.usd;
+
+            const taxTotal = single + military + esv;
+            const totalUsd = net + taxTotal;
+
+            const taxUah = taxTotal * r.usd;
+            const transferUah = incomingUah - taxUah;
+            const transferUsd = transferUah / r.usd;
+
+            const diff = totalUsd - incomingUsd;
+
+            calc = {
+                incomingUsd, incomingUah,
+                single, military, esv,
+                taxTotal, taxUah,
+                totalUsd, transferUah, transferUsd,
+                diff,
+                transferUahNbu: incomingUah - (taxTotal * state.nbuFixed.usd),
+                transferUahMono: state.mono.usd ? incomingUah - (taxTotal * state.mono.usd) : null
+            };
+
+            resultUah.textContent = transferUah.toFixed(0) + ' ₴';
+            resultUsd.textContent = transferUsd.toFixed(2);
+
+            if (Math.abs(diff) < 0.01) {
+                compareBlock.className = 'rounded-xl p-6 bg-slate-100';
+                compareIcon.textContent = '→';
+                compareValue.textContent = 'Зійшлось';
+            } else if (diff > 0) {
+                compareBlock.className = 'rounded-xl p-6 bg-red-50';
+                compareIcon.textContent = '↓';
+                compareValue.textContent = diff.toFixed(2) + ' USD не вистачає';
+            } else {
+                compareBlock.className = 'rounded-xl p-6 bg-emerald-50';
+                compareIcon.textContent = '↑';
+                compareValue.textContent = Math.abs(diff).toFixed(2) + ' USD запас';
             }
 
-            const salaryUsd = salaryEur * (eurToUah / usdToUah);
-            const taxUsd = salaryUsd - netUsd;
+            detailDate.value ||= rateDate.value || new Date().toISOString().slice(0, 10);
+            detailMonth.textContent = new Date(detailDate.value).toLocaleString('uk-UA', { month: 'long', year: 'numeric' });
 
-            const taxAmount = (taxPercent / 100) * netUsd;
-            const militaryAmount = (militaryPercent / 100) * netUsd;
-            const esvUsd = esvUah / usdToUah;
-            const totalTaxes = taxAmount + militaryAmount + esvUsd;
+            dIncoming.textContent = incoming + ' ' + curr;
+            dDesired.textContent = net + ' USD';
+            dNbu.textContent = state.nbuFixed.usd.toFixed(2);
+            dMono.textContent = state.mono.usd ? state.mono.usd.toFixed(2) : '—';
+            dCross.textContent = (state.nbuFixed.eur / state.nbuFixed.usd).toFixed(4);
+            dRateSource.textContent = { nbu: 'НБУ', monobank: 'Monobank', manual: 'Вручну' }[state.rate];
 
-            const diff = Math.abs(totalTaxes - taxUsd);
-            const matched = diff < 1 ? '✅ Податки зійшлися приблизно правильно.' : '⚠️ Податки не збігаються. Різниця: $' + diff.toFixed(2);
+            dSingle.textContent = single.toFixed(2) + ' USD / ' + (single * r.usd).toFixed(0) + ' ₴';
+            dMilitary.textContent = military.toFixed(2) + ' USD / ' + (military * r.usd).toFixed(0) + ' ₴';
+            dEsv.textContent = esv.toFixed(2) + ' USD / ' + (esv * r.usd).toFixed(0) + ' ₴';
 
-            document.getElementById('result').innerHTML = `
-        <strong>Конвертовано: ${salaryUsd.toFixed(2)} USD</strong><br>
-        Бажана ЗП (на руки): $${netUsd.toFixed(2)}<br>
-        Єдиний податок (${taxPercent}%): $${taxAmount.toFixed(2)}<br>
-        Військовий збір (${militaryPercent}%): $${militaryAmount.toFixed(2)}<br>
-        ЄСВ: $${esvUsd.toFixed(2)}<br>
-        Загальна сума податків: $${totalTaxes.toFixed(2)}<br>
-        ${matched}
-      `;
+            dTotal.textContent = totalUsd.toFixed(2) + ' USD / ' + (totalUsd * r.usd).toFixed(0) + ' ₴';
+            dTaxTotal.textContent = taxTotal.toFixed(2) + ' USD / ' + taxUah.toFixed(0) + ' ₴';
+
+            const fop = +fopBalance.value || 0;
+            dFopUpdated.textContent = (fop + taxUah).toFixed(0) + ' ₴';
+            dTransfer.textContent = transferUah.toFixed(0) + ' ₴';
         }
+
+        function toggleDetails() { exportArea.classList.toggle('hidden'); }
+
+        function exportPDF() {
+            generatedAt.textContent = getFormattedDateTime();
+            exportArea.classList.remove('hidden');
+            exportArea.classList.add('pdf-mode');
+            html2pdf().from(exportArea).set({
+                margin: 15,
+                filename: 'fop_calculation.pdf',
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).save().then(() => {
+                exportArea.classList.remove('pdf-mode');
+                exportArea.classList.add('hidden');
+            });
+        }
+
+        function exportExcel() {
+            const rows = [
+                { Поле: 'Дата документа', Значення: detailDate.value },
+                { Поле: 'Сформовано', Значення: getFormattedDateTime() },
+                { Поле: 'Вхідна сума', Значення: dIncoming.textContent },
+                { Поле: 'Бажана сума (USD)', Значення: netUsd.value },
+                { Поле: 'Курс НБУ (USD)', Значення: state.nbuFixed.usd.toFixed(2) },
+                { Поле: 'Курс Monobank (USD)', Значення: state.mono.usd ? state.mono.usd.toFixed(2) : '—' },
+                { Поле: 'Кроскурс EUR/USD', Значення: (state.nbuFixed.eur / state.nbuFixed.usd).toFixed(4) },
+                { Поле: 'ЄП (USD)', Значення: calc.single.toFixed(2) },
+                { Поле: 'ВЗ (USD)', Значення: calc.military.toFixed(2) },
+                { Поле: 'ЄСВ (USD)', Значення: calc.esv.toFixed(2) },
+                { Поле: 'Сума податків (USD)', Значення: calc.taxTotal.toFixed(2) },
+                { Поле: 'Сума податків (UAH)', Значення: calc.taxUah.toFixed(0) },
+                { Поле: 'Загальна сума A (USD)', Значення: calc.totalUsd.toFixed(2) },
+                { Поле: 'Вхідна сума B (USD)', Значення: calc.incomingUsd.toFixed(2) },
+                { Поле: 'Порівняння A − B (USD)', Значення: calc.diff.toFixed(2) },
+                { Поле: 'Сума для переказу (UAH, НБУ)', Значення: calc.transferUahNbu.toFixed(0) },
+                { Поле: 'Сума для переказу (UAH, Monobank)', Значення: calc.transferUahMono ? calc.transferUahMono.toFixed(0) : '—' },
+                { Поле: 'Сума для переказу (USD)', Значення: calc.transferUsd.toFixed(2) }
+            ];
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Calculation');
+            XLSX.writeFile(wb, 'fop_calculation.xlsx');
+        }
+
+        // EVENTS
+        ['rateDate', 'usdManual', 'eurManual'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', fetchRates);
+        });
+        ['incomingAmount', 'incomingCurrency', 'netUsd',
+            'taxSingle', 'taxMilitary', 'taxEsv',
+            'fopBalance', 'personalBalance'
+        ].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', update);
+        });
 
         fetchRates();
     </script>
+
 </body>
 
 </html>
