@@ -48,7 +48,6 @@
         body {
             background-color: #09090b;
             color: white;
-            overflow: hidden;
         }
 
         /* Custom Scrollbar */
@@ -110,10 +109,32 @@
         .timer-running {
             animation: pulse-border 2s infinite;
         }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .set-done {
+            animation: pop 0.25s ease-out;
+        }
+
+        .exercise-done {
+            animation: pop 0.4s ease-out;
+        }
     </style>
 </head>
 
-<body class="h-screen w-screen flex flex-col">
+<body class="flex flex-col">
 
     <!-- SCREEN 1: CREATE WORKOUT -->
     <div id="screen-create" class="flex-1 flex items-center justify-center p-4 bg-zinc-950 overflow-y-auto">
@@ -135,7 +156,7 @@
                     <div class="space-y-3">
                         <label class="text-zinc-400 uppercase text-xs font-bold tracking-wider">Day</label>
                         <select id="input-day"
-                            class="w-full h-14 text-lg bg-zinc-950 border border-zinc-800 rounded-2xl px-4 focus:outline-none focus:border-lime-400 text-white">
+                            class="w-full h-14 text-lg bg-zinc-950 border border-zinc-800 rounded-2xl px-4 pr-10 focus:outline-none focus:border-lime-400 text-white">
                             <option>Monday</option>
                             <option>Tuesday</option>
                             <option>Wednesday</option>
@@ -177,7 +198,7 @@
     </div>
 
     <!-- SCREEN 2: DASHBOARD -->
-    <div id="screen-dashboard" class="hidden-screen h-screen flex flex-col bg-zinc-950 text-white overflow-hidden">
+    <div id="screen-dashboard" class="hidden-screen md:h-screen flex flex-col bg-zinc-950 text-white overflow-hidden">
 
         <!-- Header -->
         <header
@@ -188,7 +209,8 @@
                     <i data-lucide="arrow-left"></i>
                 </button>
                 <div>
-                    <h1 id="header-title" class="text-xl font-black uppercase tracking-tight">WORKOUT NAME</h1>
+                    <h1 id="header-title" class="text-sm md:text-lg lg:text-xl font-black uppercase tracking-tight">
+                        WORKOUT NAME</h1>
                     <p id="header-day" class="text-xs text-lime-400 font-bold uppercase tracking-widest">DAY</p>
                 </div>
             </div>
@@ -198,7 +220,17 @@
                     <i data-lucide="clock" class="text-lime-400 w-4 h-4"></i>
                     <span id="session-timer" class="font-mono font-bold text-lg">00:00</span>
                 </div>
-                <button onclick="app.goBack()"
+                <div class="hidden md:flex items-center gap-4 bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-800">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-lime-400"></i>
+                        <span id="header-stats-exercises" class="font-bold text-sm">0 / 0</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-lime-400"></i>
+                        <span id="header-stats-percent" class="font-bold text-sm">0%</span>
+                    </div>
+                </div>
+                <button onclick="app.showCompleteScreen()"
                     class="bg-lime-400 text-zinc-950 hover:bg-lime-300 font-bold px-6 py-2 rounded-xl hidden md:flex transition-colors">
                     End Workout
                 </button>
@@ -249,7 +281,7 @@
                         </div>
                     </div>
 
-                    <!-- Bottom: Timer & Stats -->
+                    <!-- Bottom: Timer & Timer Presets -->
                     <div class="flex-1/2 min-h-0 flex flex-col md:flex-row gap-4">
 
                         <!-- Timer -->
@@ -277,48 +309,38 @@
                             </div>
                         </div>
 
-                        <!-- Stats -->
+                        <!-- Timer Presets -->
                         <div
-                            class="flex-1 min-h-[200px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg relative">
-                            <div class="p-6 h-full flex flex-row items-center justify-between gap-4">
-                                <!-- Ring -->
-                                <div class="relative w-32 h-32 flex-shrink-0 flex items-center justify-center">
-                                    <svg class="transform -rotate-90 w-full h-full">
-                                        <circle cx="64" cy="64" r="50" stroke="#27272a" stroke-width="10"
-                                            fill="transparent"></circle>
-                                        <circle id="stats-ring" cx="64" cy="64" r="50" stroke="#a3e635"
-                                            stroke-width="10" fill="transparent" stroke-dasharray="314.159"
-                                            stroke-dashoffset="314.159" stroke-linecap="round"
-                                            class="transition-all duration-1000 ease-in-out"></circle>
-                                    </svg>
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span id="stats-percent" class="text-2xl font-black text-white">0%</span>
-                                        <span class="text-[10px] text-zinc-500 font-bold uppercase mt-1">Progress</span>
-                                    </div>
-                                </div>
+                            class="flex-1 min-h-[200px] md:min-h-0 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-lg p-6 flex flex-col gap-4">
+                            <h3 class="text-sm uppercase text-zinc-400 font-bold tracking-wider">Timer Presets</h3>
+                            <div id="preset-buttons" class="grid grid-cols-2 gap-3">
+                                <button
+                                    class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                                    onclick="app.startPreset(30)">30 sec</button>
+                                <button
+                                    class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                                    onclick="app.startPreset(45)">45 sec</button>
+                                <button
+                                    class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                                    onclick="app.startPreset(60)">1 min</button>
+                                <button
+                                    class="h-16 rounded-2xl border border-zinc-700 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                                    onclick="app.openPresetModal()">Custom</button>
+                            </div>
 
-                                <!-- List -->
-                                <div class="flex-1 space-y-4">
-                                    <div
-                                        class="flex items-center gap-3 p-3 rounded-2xl bg-zinc-950/50 border border-zinc-800/50">
-                                        <div class="p-2 bg-zinc-800 rounded-xl text-blue-400"><i
-                                                data-lucide="check-circle-2" class="w-5 h-5"></i></div>
-                                        <div>
-                                            <p class="text-xs text-zinc-500 uppercase font-bold">Exercises</p>
-                                            <p id="stats-exercises" class="text-lg font-bold text-white leading-none">0
-                                                / 0</p>
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="flex items-center gap-3 p-3 rounded-2xl bg-zinc-950/50 border border-zinc-800/50">
-                                        <div class="p-2 bg-zinc-800 rounded-xl text-orange-400"><i data-lucide="clock"
-                                                class="w-5 h-5"></i></div>
-                                        <div>
-                                            <p class="text-xs text-zinc-500 uppercase font-bold">Duration</p>
-                                            <p id="stats-duration" class="text-lg font-bold text-white leading-none">
-                                                00:00</p>
-                                        </div>
-                                    </div>
+                            <div id="preset-active"
+                                class="hidden-screen flex flex-col items-center justify-center gap-6">
+                                <div id="preset-display" class="text-5xl font-black font-mono">00:00</div>
+
+                                <div class="flex gap-4 w-full">
+                                    <button id="preset-toggle" onclick="app.togglePreset()"
+                                        class="flex-1 h-14 bg-lime-400 rounded-2xl font-bold">
+                                        Pause
+                                    </button>
+                                    <button onclick="app.cancelPreset()"
+                                        class="flex-1 h-14 border border-zinc-700 rounded-2xl">
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -349,6 +371,53 @@
         </main>
     </div>
 
+    <!-- SCREEN 3: WORKOUT COMPLETE -->
+    <div id="screen-complete" class="hidden-screen h-screen w-screen flex items-center justify-center bg-zinc-950 p-6">
+        <div
+            class="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-3xl p-10 text-center space-y-6 shadow-2xl">
+            <div class="mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-lime-400/20 text-lime-400">
+                <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+            </div>
+
+            <h2 class="text-3xl font-black text-white">Workout Complete</h2>
+            <p class="text-zinc-400">Good job. Session finished.</p>
+
+            <div class="flex justify-center gap-10 pt-4">
+                <div>
+                    <p class="text-xs uppercase text-zinc-500 font-bold">Progress</p>
+                    <p id="complete-progress" class="text-2xl font-black text-white">100%</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-zinc-500 font-bold">Duration</p>
+                    <p id="complete-duration" class="text-2xl font-black text-white">00:00</p>
+                </div>
+            </div>
+
+            <button onclick="app.resetToCreate()"
+                class="mt-6 w-full h-16 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-bold text-lg transition-colors">
+                Start New Session
+            </button>
+        </div>
+    </div>
+
+    <div id="preset-modal" class="hidden-screen fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div class="bg-zinc-900 rounded-3xl p-6 w-full max-w-sm space-y-4">
+            <h3 class="text-lg font-bold">Custom Timer</h3>
+
+            <div class="grid grid-cols-3 gap-3">
+                <input id="ph" type="number" placeholder="HH" class="h-14 bg-zinc-950 text-center rounded-xl">
+                <input id="pm" type="number" placeholder="MM" class="h-14 bg-zinc-950 text-center rounded-xl">
+                <input id="ps" type="number" placeholder="SS" class="h-14 bg-zinc-950 text-center rounded-xl">
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="app.startCustomPreset()"
+                    class="flex-1 h-14 bg-lime-400 rounded-2xl text-black font-bold">Start</button>
+                <button onclick="app.closePresetModal()" class="flex-1 h-14 border rounded-2xl">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- APP SCRIPT -->
     <script>
         // --- DATA & STATE ---
@@ -371,13 +440,144 @@
                 timerRunning: false,
                 sessionTimerId: null,
                 timerIntervalId: null,
-                activeTab: 'video'
+                activeTab: 'video',
+                preset: {
+                    active: false,
+                    remaining: 0,
+                    intervalId: null,
+                },
+            },
+
+
+
+
+
+            showCompleteScreen: function () {
+                // Беремо дані ЗІ STATE, а не з DOM
+                const total = this.state.exercises.length;
+                const completed = this.state.exercises.filter(e => e.completed).length;
+                const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                const durationSec = this.state.sessionTime;
+                const m = Math.floor(durationSec / 60);
+                const s = durationSec % 60;
+
+                document.getElementById('complete-progress').innerText = `${percent}%`;
+                document.getElementById('complete-duration').innerText =
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+                document.getElementById('screen-dashboard').classList.add('hidden-screen');
+                document.getElementById('screen-complete').classList.remove('hidden-screen');
+
+                clearInterval(this.state.sessionTimerId);
+                clearInterval(this.state.timerIntervalId);
+
+                setTimeout(() => lucide.createIcons(), 50);
+            },
+
+            startPreset: function (seconds) {
+                this.cancelPreset();
+
+                this.state.preset.active = true;
+                this.state.preset.remaining = seconds;
+
+                document.getElementById('preset-buttons').classList.add('hidden-screen');
+                document.getElementById('preset-active').classList.remove('hidden-screen');
+
+                this.updatePresetDisplay();
+
+                this.state.preset.intervalId = setInterval(() => {
+                    if (this.state.preset.remaining <= 0) {
+                        this.finishPreset();
+                        return;
+                    }
+                    this.state.preset.remaining--;
+                    this.updatePresetDisplay();
+                }, 1000);
+            },
+
+            togglePreset: function () {
+                const btn = document.getElementById('preset-toggle');
+
+                if (this.state.preset.intervalId) {
+                    clearInterval(this.state.preset.intervalId);
+                    this.state.preset.intervalId = null;
+                    btn.innerText = 'Start';
+                } else {
+                    btn.innerText = 'Pause';
+                    this.state.preset.intervalId = setInterval(() => {
+                        if (this.state.preset.remaining <= 0) {
+                            this.finishPreset();
+                            return;
+                        }
+                        this.state.preset.remaining--;
+                        this.updatePresetDisplay();
+                    }, 1000);
+                }
+            },
+
+            cancelPreset: function () {
+                clearInterval(this.state.preset.intervalId);
+                this.state.preset.intervalId = null;
+                this.state.preset.active = false;
+
+                document.getElementById('preset-active').classList.add('hidden-screen');
+                document.getElementById('preset-buttons').classList.remove('hidden-screen');
+            },
+
+            finishPreset: function () {
+                this.playTimerSound();
+                // дати Safari запустити звук
+                setTimeout(() => {
+                    this.cancelPreset();
+                }, 150);
+            },
+
+            updatePresetDisplay: function () {
+                const m = Math.floor(this.state.preset.remaining / 60);
+                const s = this.state.preset.remaining % 60;
+                document.getElementById('preset-display').innerText =
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            },
+
+            openPresetModal: function () {
+                document.getElementById('preset-modal').classList.remove('hidden-screen');
+            },
+
+            closePresetModal: function () {
+                document.getElementById('preset-modal').classList.add('hidden-screen');
+            },
+
+            startCustomPreset: function () {
+                const h = parseInt(document.getElementById('ph').value) || 0;
+                const m = parseInt(document.getElementById('pm').value) || 0;
+                const s = parseInt(document.getElementById('ps').value) || 0;
+
+                const total = h * 3600 + m * 60 + s;
+                if (total > 0) {
+                    this.closePresetModal();
+                    this.startPreset(total);
+                }
+            },
+
+            resetToCreate: function () {
+                this.state.timerRunning = false;
+                this.state.timerTime = 0;
+                this.state.sessionTime = 0;
+
+                document.getElementById('screen-complete').classList.add('hidden-screen');
+                document.getElementById('screen-create').classList.remove('hidden-screen');
             },
 
             // --- INIT ---
             init: function () {
                 this.renderCreateExercises();
                 lucide.createIcons();
+
+                // 🔊 PRELOAD TIMER SOUND (IMPORTANT FOR SAFARI)
+                this.audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                this.audio.volume = 1.0;
+                this.audio.preload = 'auto';
             },
 
             // --- CREATE WORKOUT LOGIC ---
@@ -476,6 +676,14 @@
 
             // --- NAVIGATION ---
             startWorkout: function () {
+                // 🔓 UNLOCK AUDIO (IMPORTANT FOR iOS)
+                if (this.audio) {
+                    try {
+                        this.audio.play();
+                        this.audio.pause();
+                        this.audio.currentTime = 0;
+                    } catch (e) { }
+                }
                 // Get inputs
                 const day = document.getElementById('input-day').value;
                 const name = document.getElementById('input-name').value;
@@ -590,6 +798,8 @@
                 lucide.createIcons();
             },
 
+
+
             toggleSet: function (exId, setIdx) {
                 const ex = this.state.exercises.find(e => e.id === exId);
                 if (!ex) return;
@@ -608,6 +818,17 @@
                 // Check completion
                 ex.completed = ex.completedSets === ex.sets;
 
+                if (ex.completed) {
+                    const card = document.getElementById(`ex-card-${ex.id}`);
+                    if (card) {
+                        card.classList.add('exercise-done');
+                        setTimeout(() => card.classList.remove('exercise-done'), 400);
+                    }
+                }
+
+                const card = document.getElementById(`ex-card-${ex.id}`);
+                if (card) card.classList.add('set-done');
+
                 // Re-render
                 this.renderExercises();
                 this.updateStats();
@@ -620,15 +841,42 @@
                 const percent = total > 0 ? (completed / total) * 100 : 0;
 
                 // Update text
-                document.getElementById('stats-exercises').innerText = `${completed} / ${total}`;
-                document.getElementById('stats-percent').innerText = `${Math.round(percent)}%`;
+                // If stats-exercises exists (for backward compatibility)
+                if (document.getElementById('stats-exercises')) {
+                    document.getElementById('stats-exercises').innerText = `${completed} / ${total}`;
+                }
+                if (document.getElementById('stats-percent')) {
+                    document.getElementById('stats-percent').innerText = `${Math.round(percent)}%`;
+                }
+                // Update header stats
+                if (document.getElementById('header-stats-exercises')) {
+                    document.getElementById('header-stats-exercises').innerText = `${completed} / ${total}`;
+                }
+                if (document.getElementById('header-stats-percent')) {
+                    document.getElementById('header-stats-percent').innerText = `${Math.round(percent)}%`;
+                }
 
-                // Update Ring SVG
+                // If SVG ring exists, update it (for backward compatibility)
                 const circle = document.getElementById('stats-ring');
-                const radius = 50;
-                const circumference = 2 * Math.PI * radius; // ~314
-                const offset = circumference - (percent / 100) * circumference;
-                circle.style.strokeDashoffset = offset;
+                if (circle) {
+                    const radius = 50;
+                    const circumference = 2 * Math.PI * radius; // ~314
+                    const offset = circumference - (percent / 100) * circumference;
+                    circle.style.strokeDashoffset = offset;
+                }
+
+                if (total > 0 && completed === total) {
+                    setTimeout(() => this.showCompleteScreen(), 600);
+                }
+            },
+
+            playTimerSound: function () {
+                if (!this.audio) return;
+                try {
+                    this.audio.currentTime = 0;
+                    this.audio.volume = 1.0;
+                    this.audio.play();
+                } catch (e) { }
             },
 
             // --- TIMER LOGIC (SESSION & STOPWATCH) ---
@@ -734,10 +982,21 @@
                     contentMusic.classList.remove('hidden-screen');
                 }
             }
+
+
+
         };
 
+
+
         // Start
-        app.init();
+        app.init(
+        );
+
+        // Ensure Lucide icons are updated after header DOM changes
+        setTimeout(() => lucide.createIcons(), 100);
+
+
     </script>
 </body>
 
