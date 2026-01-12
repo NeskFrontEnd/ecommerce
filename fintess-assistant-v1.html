@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workout – Final Stable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .timer-box {
+            border: 2px solid #a3e635;
+        }
+    </style>
+</head>
+
+<body class="h-screen bg-neutral-900 text-white">
+
+    <!-- ENTRY SCREEN -->
+    <div id="entryScreen" class="h-screen flex flex-col items-center justify-center gap-6 px-6">
+        <h1 class="text-2xl font-semibold">Plan your training ritual</h1>
+        <p class="opacity-60 text-sm">Choose or create a training day</p>
+        <div id="daysList" class="w-full max-w-md space-y-3"></div>
+        <button onclick="addTrainingDay()" class="px-4 py-2 bg-neutral-800 rounded-xl">
+            + Add training day
+        </button>
+    </div>
+
+    <div id="workoutApp" class="hidden">
+        <!-- HEADER -->
+        <header class="px-6 py-3 flex justify-between text-sm opacity-80">
+            <div>Workout</div>
+            <div class="flex items-center gap-4 text-xs" style="font-variant-numeric: tabular-nums;">
+                <div id="duration" class="w-[110px] text-right">
+                    DURATION 00:00
+                </div>
+                <div id="exerciseStat" class="w-[90px] text-right">
+                    Exercise 0/0
+                </div>
+                <div id="setsStat" class="w-[80px] text-right">
+                    Sets 0/0
+                </div>
+                <div class="w-28 h-1 bg-neutral-700 rounded overflow-hidden">
+                    <div id="bar" class="h-full bg-lime-400 w-0"></div>
+                </div>
+                <div id="percent" class="w-[40px] text-right">
+                    0%
+                </div>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-12 gap-4 px-6 pb-6 h-[calc(100%-56px)]">
+
+            <!-- VIDEO -->
+            <section class="col-span-7 bg-neutral-800 rounded-xl flex items-center justify-center">
+                <span class="opacity-50 text-xl">VIDEO</span>
+            </section>
+
+            <!-- RIGHT -->
+            <section class="col-span-5 flex flex-col gap-4">
+
+                <!-- TIMER + SETS -->
+                <div class="grid grid-cols-4 gap-3">
+
+                    <div
+                        class="col-span-3 timer-box bg-neutral-800 rounded-xl h-40 flex flex-col items-center justify-center">
+                        <div id="label" class="text-sm text-lime-400 mb-1">Ready</div>
+                        <div id="time" class="text-5xl text-lime-400 font-mono">00:00</div>
+                        <div id="recoveryBankUI" class="text-xs mt-2 text-blue-400 opacity-80 hidden">
+                            Recovery Bank +0s
+                        </div>
+                    </div>
+
+                    <div class="bg-neutral-800 rounded-xl p-3 text-sm">
+                        <div class="opacity-60 mb-1">Sets</div>
+                        <ul id="sets"></ul>
+                    </div>
+
+                </div>
+
+                <!-- PLAN -->
+                <div class="bg-neutral-800 rounded-xl p-4 flex-1">
+                    <div class="opacity-60 mb-2">Plan</div>
+                    <div id="plan"></div>
+                </div>
+
+                <!-- CONTROLS -->
+                <div id="controls" class="flex gap-2"></div>
+
+            </section>
+        </main>
+
+        <!-- FINISH -->
+        <div id="finish" class="hidden fixed inset-0 bg-neutral-900 p-10 overflow-y-auto">
+            <h1 class="text-3xl mb-2">Workout Complete</h1>
+            <p class="opacity-70 mb-6">Good job. Session finished.</p>
+            <div id="finalDuration" class="mb-6"></div>
+            <div id="summary" class="space-y-4 mb-8"></div>
+            <button onclick="location.reload()" class="px-6 py-3 bg-lime-400 text-black rounded-xl">
+                Start New Session
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- LOCALSTORAGE SCHEMA ---
+        const STORAGE_KEY = 'trainingDays';
+
+        let isCountdown = false;
+        let activeDayId = null;
+
+        function loadDays() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        }
+
+        function saveDays(days) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(days));
+        }
+
+        let trainingDays = loadDays();
+
+        // --- DEFAULT DAY ---
+        if (Object.keys(trainingDays).length === 0) {
+            trainingDays = {
+                dayA: {
+                    id: 'dayA',
+                    name: 'Day A',
+                    exercises: [
+                        { id: crypto.randomUUID(), name: 'Squats', sets: 3, value: 15, unit: 'reps' },
+                        { id: crypto.randomUUID(), name: 'Push Ups', sets: 3, value: 12, unit: 'reps' },
+                        { id: crypto.randomUUID(), name: 'Lunges', sets: 3, value: 20, unit: 'reps' }
+                    ],
+                    history: []
+                }
+            };
+            saveDays(trainingDays);
+        }
+
+        function getSuggestionsForDay(day) {
+            const suggestions = [];
+
+            day.exercises.forEach(ex => {
+                if (ex.unit !== 'reps') return;
+
+                const lastTwo = day.history
+                    .slice(-2)
+                    .filter(session =>
+                        session.exercises?.some(e => e.name === ex.name)
+                    );
+
+                if (lastTwo.length < 2) return;
+
+                const ratings = lastTwo.map(session => {
+                    const found = session.exercises.find(e => e.name === ex.name);
+                    return found?.rating;
+                });
+
+                if (ratings.every(r => r === 'hard')) {
+                    suggestions.push({
+                        exercise: ex.name,
+                        type: 'decrease',
+                        value: 2,
+                        reason: '2× HARD'
+                    });
+                }
+
+                if (ratings.every(r => r === 'easy')) {
+                    suggestions.push({
+                        exercise: ex.name,
+                        type: 'increase',
+                        value: 2,
+                        reason: '2× EASY'
+                    });
+                }
+            });
+
+            return suggestions;
+        }
+
+
+        // --- ENTRY UI RENDER ---
+        function renderDays() {
+            const el = document.getElementById('daysList');
+            el.innerHTML = '';
+
+            Object.values(trainingDays).forEach(day => {
+                const last = day.history.at(-1);
+                const suggestions = getSuggestionsForDay(day);
+
+                let suggestionHtml = '';
+                if (suggestions.length) {
+                    suggestionHtml = `
+                <div class="mt-2 text-xs text-yellow-400">
+                    <div class="mb-1 font-semibold">Suggested changes for today</div>
+                    ${suggestions.map(s =>
+                        `• ${s.exercise}: ${s.type === 'increase' ? '+' : '−'}${s.value} reps (${s.reason})`
+                    ).join('<br>')}
+                </div>
+            `;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'bg-neutral-800 rounded-xl p-4 flex justify-between items-center';
+
+                div.innerHTML = `
+            <div>
+                <div class="font-semibold">${day.name}</div>
+                <div class="text-xs opacity-60">
+                    ${last ? `Last workout: ${last.date}` : 'No workouts yet'}
+                </div>
+                ${suggestionHtml}
+            </div>
+
+            <div class="flex gap-2">
+                <button class="px-3 py-1 bg-neutral-700 rounded-xl">Edit</button>
+                <button class="px-3 py-1 bg-lime-400 text-black rounded-xl">Start</button>
+            </div>
+        `;
+
+                const [editBtn, startBtn] = div.querySelectorAll('button');
+                editBtn.onclick = () => openDayEditor(day.id);
+                startBtn.onclick = () => startDay(day.id);
+
+                el.appendChild(div);
+            });
+        }
+        // ---- DAY EDITOR STATE ----
+        let editingDayId = null;
+
+        // ---- DAY EDITOR UI ----
+        function openDayEditor(dayId) {
+            editingDayId = dayId;
+            const day = trainingDays[dayId];
+
+            document.getElementById('entryScreen').classList.add('hidden');
+            document.getElementById('dayEditor').classList.remove('hidden');
+
+            document.getElementById('dayNameInput').value = day.name;
+            document.getElementById('saveIndicator').innerText = 'Saved';
+            saveIndicator.className = 'text-xs text-neutral-400';
+            renderExerciseEditor(day);
+        }
+
+        function closeDayEditor() {
+            editingDayId = null;
+            document.getElementById('dayEditor').classList.add('hidden');
+            document.getElementById('entryScreen').classList.remove('hidden');
+            renderDays();
+        }
+
+        function renderExerciseEditor(day) {
+            const el = document.getElementById('exerciseEditorList');
+            el.innerHTML = '';
+            day.exercises.forEach((ex, i) => {
+                // Exercise main row
+                const row = document.createElement('div');
+                row.className = 'bg-neutral-800 rounded-xl p-4 mb-2';
+                row.innerHTML = `
+                  <div class="flex justify-between items-center mb-2">
+                    <input class="flex-1 bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1"
+                           value="${ex.name}" />
+                    <div class="flex gap-1 ml-2">
+                      <button data-up>↑</button>
+                      <button data-down>↓</button>
+                      <button data-del>✕</button>
+                    </div>
+                  </div>
+                  <div class="flex gap-3 text-sm">
+                    <div>
+                      Sets
+                      <input type="number" min="1" value="${ex.sets}" class="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1" />
+                    </div>
+                    <div>
+                      <select class="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1">
+                        <option value="reps" ${ex.unit === 'reps' ? 'selected' : ''}>Reps</option>
+                        <option value="sec" ${ex.unit === 'sec' ? 'selected' : ''}>Seconds</option>
+                      </select>
+                      <input type="number" min="1" value="${ex.value}" class="bg-neutral-900 text-white border border-neutral-700 rounded px-2 py-1" />
+                    </div>
+                  </div>
+                `;
+                const nameInput = row.querySelector('input');
+                const setsInput = row.querySelectorAll('input')[1];
+                const valueInput = row.querySelectorAll('input')[2];
+                const select = row.querySelector('select');
+                const btnUp = row.querySelector('button[data-up]');
+                const btnDown = row.querySelector('button[data-down]');
+                const btnDel = row.querySelector('button[data-del]');
+                // Name input
+                nameInput.oninput = e => {
+                    markUnsaved();
+                    trainingDays[editingDayId].exercises[i].name = e.target.value;
+                    saveDays(trainingDays);
+                    markSaved();
+                };
+                // Sets input
+                setsInput.oninput = e => {
+                    markUnsaved();
+                    trainingDays[editingDayId].exercises[i].sets = +e.target.value || 1;
+                    saveDays(trainingDays);
+                    markSaved();
+                };
+                // Value input
+                valueInput.oninput = e => {
+                    markUnsaved();
+                    trainingDays[editingDayId].exercises[i].value = +e.target.value || 1;
+                    saveDays(trainingDays);
+                    markSaved();
+                };
+                // Unit select
+                select.onchange = e => {
+                    markUnsaved();
+                    trainingDays[editingDayId].exercises[i].unit = e.target.value;
+                    saveDays(trainingDays);
+                    markSaved();
+                };
+                // Delete
+                btnDel.onclick = () => {
+                    markUnsaved();
+                    trainingDays[editingDayId].exercises.splice(i, 1);
+                    saveDays(trainingDays);
+                    renderExerciseEditor(trainingDays[editingDayId]);
+                    markSaved();
+                };
+                // Reorder up
+                btnUp.onclick = () => {
+                    if (i > 0) {
+                        markUnsaved();
+                        const arr = trainingDays[editingDayId].exercises;
+                        [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+                        saveDays(trainingDays);
+                        renderExerciseEditor(trainingDays[editingDayId]);
+                        markSaved();
+                    }
+                };
+                // Reorder down
+                btnDown.onclick = () => {
+                    const arr = trainingDays[editingDayId].exercises;
+                    if (i < arr.length - 1) {
+                        markUnsaved();
+                        [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+                        saveDays(trainingDays);
+                        renderExerciseEditor(trainingDays[editingDayId]);
+                        markSaved();
+                    }
+                };
+                // Inline last feedback after exercise title block
+                const lastSession = day.history.at(-1);
+                let lastRating = null;
+                if (lastSession) {
+                    const hist = lastSession.exercises.find(h => h.name === ex.name);
+                    if (hist) lastRating = hist.rating;
+                }
+                if (lastRating) {
+                    row.insertAdjacentHTML(
+                        'beforeend',
+                        `<div class="mt-2 text-xs opacity-60">
+                      Last: ${lastRating.toUpperCase()}
+                    </div>`
+                    );
+                }
+                // Soft suggestion if 2× HARD
+                if (ex.unit === 'reps') {
+                    const lastTwo = day.history.slice(-2);
+
+                    const hardCount = lastTwo.filter(session =>
+                        Array.isArray(session.exercises) &&
+                        session.exercises.some(e =>
+                            e.name === ex.name && e.rating === 'hard'
+                        )
+                    ).length;
+
+                    const easyCount = lastTwo.filter(session =>
+                        Array.isArray(session.exercises) &&
+                        session.exercises.some(e =>
+                            e.name === ex.name && e.rating === 'easy'
+                        )
+                    ).length;
+
+                    if (hardCount === 2) {
+                        row.insertAdjacentHTML(
+                            'beforeend',
+                            `<div class="mt-1 text-xs text-yellow-400">
+                                2× HARD → maybe −2 reps
+                            </div>`
+                        );
+                    }
+
+                    if (easyCount === 2) {
+                        row.insertAdjacentHTML(
+                            'beforeend',
+                            `<div class="mt-1 text-xs text-sky-400">
+                                2× EASY → maybe +2 reps
+                            </div>`
+                        );
+                    }
+                }
+                el.appendChild(row);
+            });
+        }
+
+        function addExerciseToEditor() {
+            if (!editingDayId) return;
+            markUnsaved();
+            trainingDays[editingDayId].exercises.push({
+                id: crypto.randomUUID(),
+                name: 'New Exercise',
+                sets: 3,
+                value: 30,
+                unit: 'reps'
+            });
+            saveDays(trainingDays);
+            renderExerciseEditor(trainingDays[editingDayId]);
+            markSaved();
+        }
+
+        // --- ADD DAY ---
+        function addTrainingDay() {
+            const id = 'day' + Date.now();
+            trainingDays[id] = {
+                id,
+                name: 'New Day',
+                exercises: [
+                    { id: crypto.randomUUID(), name: 'Exercise', sets: 3, value: 15, unit: 'reps' }
+                ],
+                history: []
+            };
+            saveDays(trainingDays);
+            renderDays();
+        }
+
+        // --- ACTIVE EXERCISES ---
+        const exercises = [];
+
+        // Recovery duration by exercise rating
+        const RECOVERY_BY_RATING = {
+            hard: 120,
+            normal: 60,
+            easy: 30
+        };
+
+        // Compute total sets once for progress tracking
+        let totalSets = 0;
+        let completedSets = 0;
+
+        const MODES = {
+            IDLE: 'idle',
+            WARMUP: 'warmup',
+            READY: 'ready',
+            WORK: 'work',
+            RECOVERY: 'recovery',
+            DECISION: 'decision',
+            COOLDOWN: 'cooldown'
+        };
+
+        let ex = -1, set = 0;
+        let currentSets = [], results = [];
+        let exerciseRatings = {};
+        function showExerciseRatingModal(exerciseName, next) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+
+            modal.innerHTML = `
+            <div class="bg-neutral-800 rounded-xl p-6 text-sm max-w-sm text-center">
+              <div class="mb-4 font-semibold">
+                Як було з вправою?
+              </div>
+
+              <div class="flex gap-2">
+                <button class="flex-1 py-2 bg-neutral-700 rounded-xl">Важко</button>
+                <button class="flex-1 py-2 bg-neutral-700 rounded-xl">Норм</button>
+                <button class="flex-1 py-2 bg-neutral-700 rounded-xl">Легко</button>
+              </div>
+            </div>
+          `;
+
+            const [hardBtn, normalBtn, easyBtn] = modal.querySelectorAll('button');
+
+            hardBtn.onclick = () => select('hard');
+            normalBtn.onclick = () => select('normal');
+            easyBtn.onclick = () => select('easy');
+
+            function select(value) {
+                exerciseRatings[exerciseName] = value;
+                modal.remove();
+                next();
+            }
+
+            document.body.appendChild(modal);
+        }
+        let timer = null, seconds = 0;
+        let durationStart = null;
+        let mode = MODES.IDLE; // warmup, work, recovery, decision, cooldown
+        let isPaused = false;
+
+        let recoveryBalance = 0;
+
+        /* HELPERS */
+        const $ = id => document.getElementById(id);
+        const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+
+
+        function applyRatingToBalance(rating) {
+            if (rating === 'hard') recoveryBalance -= 20;
+            if (rating === 'easy') recoveryBalance += 10;
+        }
+
+
+        function showExerciseRecoveryModal(rating, next) {
+            stopTimer();
+
+            const recoveryText = {
+                hard: `
+                <li>• Відпочинок +1 хв (автоматично)</li>
+                <li>• Подихай глибоко</li>
+                <li>• Випий води</li>
+                <li>• Походи, порухайся</li>
+                <li>• Не сиди на місці</li>
+                <li>• Не можна остивати — тримай мʼязи в тонусі</li>
+              `,
+                normal: `
+                <li>• Зроби відпочинок</li>
+                <li>• Подихай глибоко</li>
+                <li>• Випий води</li>
+                <li>• Походи, порухайся</li>
+              `,
+                easy: `
+                <li>• Можеш продовжити швидше</li>
+                <li>• Не чекай повну хвилину відпочинку</li>
+              `
+            };
+
+            const baseRecovery = RECOVERY_BY_RATING[rating] || 60;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+
+            modal.innerHTML = `
+              <div class="bg-neutral-800 rounded-xl p-6 text-sm max-w-sm">
+                <div class="mb-3 font-semibold">Recovery recommendations</div>
+                <ul class="space-y-1 opacity-80 mb-4">
+                  ${recoveryText[rating]}
+                </ul>
+                <button class="px-4 py-2 bg-neutral-700 rounded-xl w-full pulse-slow">
+                  Continue
+                </button>
+              </div>
+            `;
+
+            modal.querySelector('button').onclick = () => {
+                modal.remove();
+                startRecovery(baseRecovery);
+            };
+
+            document.body.appendChild(modal);
+        }
+
+
+        /* DURATION */
+        setInterval(() => {
+            if (!durationStart) return;
+            const s = Math.floor((Date.now() - durationStart) / 1000);
+            $('duration').innerText = 'DURATION ' + fmt(s);
+        }, 1000);
+
+        /* TIMER */
+        function startTimer(startFrom = 0) {
+            stopTimer();
+            seconds = startFrom;
+            timer = setInterval(() => {
+                seconds++;
+                $('time').innerText = fmt(seconds);
+            }, 1000);
+        }
+        function startCountdown(sec, cb) {
+            stopTimer();
+            seconds = sec;
+            $('time').innerText = fmt(seconds);
+            timer = setInterval(() => {
+                seconds--;
+                $('time').innerText = fmt(seconds);
+
+                if (seconds <= 0) { stopTimer(); cb(); }
+            }, 1000);
+        }
+        function stopTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        /* COLOR THEME */
+        function applyModeColors(mode) {
+            const timerBox = $('time').parentElement;
+            const label = $('label');
+            const time = $('time');
+
+            // Remove all possible color classes first
+            const colors = ['orange-400', 'white', 'lime-400', 'blue-400', 'sky-400'];
+            colors.forEach(color => {
+                timerBox.classList.remove(`border-${color}`);
+                label.classList.remove(`text-${color}`);
+                time.classList.remove(`text-${color}`);
+            });
+
+            if (mode === MODES.WARMUP) {
+                timerBox.classList.add('border-orange-400');
+                label.classList.add('text-orange-400');
+                time.classList.add('text-orange-400');
+            } else if (mode === 'ready') {
+                timerBox.classList.add('border-white');
+                label.classList.add('text-white');
+                time.classList.add('text-white');
+            } else if (mode === MODES.WORK) {
+                timerBox.classList.add('border-lime-400');
+                label.classList.add('text-lime-400');
+                time.classList.add('text-lime-400');
+            } else if (mode === MODES.RECOVERY) {
+                timerBox.classList.add('border-blue-400');
+                label.classList.add('text-blue-400');
+                time.classList.add('text-blue-400');
+            } else if (mode === MODES.COOLDOWN) {
+                timerBox.classList.add('border-sky-400');
+                label.classList.add('text-sky-400');
+                time.classList.add('text-sky-400');
+            }
+        }
+
+        /* UI */
+        function renderPlan() {
+            $('plan').innerHTML = exercises.map((e, i) => {
+                if (i < ex) return `<div class="opacity-40 line-through mb-2 flex justify-between items-center">
+      <span>${e.name}</span>
+      <span>✓</span>
+      </div><div class="opacity-40 mb-2">${e.sets} × ${e.unit === 'reps' ? e.value : e.value + 's'}</div>`;
+                if (i === ex) {
+                    let setsHtml = '';
+                    for (let si = 0; si < e.sets; si++) {
+                        setsHtml += `<span class="inline-block px-2 py-1 mr-1 rounded ${si < set ? 'bg-lime-400 text-black' : 'bg-neutral-700'
+                            }">${e.unit === 'reps' ? e.value : e.value + 's'}</span>`;
+                    }
+                    return `<div class="mb-3">
+      <div class="font-semibold">${e.name} (ACTIVE)</div>
+      <div class="text-sm opacity-70">${setsHtml}</div>
+    </div>`;
+                }
+                return `<div class="opacity-70 mb-2">${e.name}</div>`;
+            }).join('');
+        }
+        function updateProgress() {
+            const p = Math.min(100, Math.round((completedSets / totalSets) * 100));
+            $('exerciseStat').innerText = `Exercise ${Math.max(ex + 1, 0)}/${exercises.length}`;
+            $('setsStat').innerText = `Sets ${completedSets}/${totalSets}`;
+            $('percent').innerText = `${p}%`;
+            $('bar').style.width = p + '%';
+        }
+
+        /* FLOW */
+        function startTraining() {
+            results = [];
+            exerciseRatings = {};
+
+            completedSets = 0;
+            durationStart = Date.now();
+            totalSets = exercises.reduce((a, e) => a + e.sets, 0);
+            startWarmup();
+        }
+
+        // --- START DAY ---
+        function startDay(dayId) {
+            activeDayId = dayId; // ← КЛЮЧОВО
+            const day = trainingDays[dayId];
+            if (!day) return;
+
+            exercises.length = 0;
+            day.exercises.forEach(e => exercises.push({ ...e }));
+
+            document.getElementById('entryScreen').classList.add('hidden');
+            document.getElementById('workoutApp').classList.remove('hidden');
+
+            renderPlan();
+            applyModeColors('ready');
+            document.getElementById('controls').innerHTML = `
+            <button onclick="startTraining()"
+                class="flex-1 py-3 bg-lime-400 text-black rounded-xl pulse-slow">
+                Start Training
+            </button>`;
+        }
+
+        function startWarmup() {
+            mode = MODES.WARMUP;
+            applyModeColors(MODES.WARMUP);
+            $('label').innerText = 'Warm-up';
+            startCountdown(180, prepareFirstSet);
+            $('controls').innerHTML = `<button onclick="prepareFirstSet()" class="flex-1 py-3 bg-neutral-700 rounded-xl pulse-slow">SKIP</button>`;
+        }
+
+        function prepareFirstSet() {
+            stopTimer();
+            $('time').innerText = '00:00';
+            ex = 0; set = 0; currentSets = [];
+            renderPlan(); updateProgress();
+            mode = MODES.READY;
+            applyModeColors('ready');
+            $('label').innerText = 'Ready';
+            $('controls').innerHTML = `<button onclick="startSet()" class="flex-1 py-3 bg-neutral-700 rounded-xl pulse-slow">Start Set</button>`;
+        }
+
+        function startSet() {
+            if (mode === MODES.WORK) return;
+            // Do NOT bank in decision mode
+            mode = MODES.WORK;
+            isPaused = false;
+            applyModeColors(MODES.WORK);
+            $('label').innerText = 'Work';
+            if (exercises[ex].unit === 'sec') {
+                isCountdown = true;
+                startCountdown(exercises[ex].value, endSet);
+            } else {
+                isCountdown = false;
+                startTimer();
+            }
+            if (exercises[ex].unit === 'sec') {
+                $('controls').innerHTML = `
+                <button id="pauseBtn" onclick="pauseSet()" class="px-4 bg-neutral-700 rounded-xl">
+                  Pause
+                </button>`;
+            } else {
+                $('controls').innerHTML = `
+                <button id="pauseBtn" onclick="pauseSet()" class="px-4 bg-neutral-700 rounded-xl">
+                  Pause
+                </button>
+                <button onclick="endSet()" class="flex-1 py-3 bg-neutral-700 rounded-xl">
+                  End Set
+                </button>`;
+            }
+        }
+
+        function pauseSet() {
+            const pauseBtn = $('pauseBtn');
+            if (!isPaused) {
+                isPaused = true;
+                stopTimer();
+                pauseBtn.innerText = 'Resume';
+            } else {
+                isPaused = false;
+                if (isCountdown) {
+                    startCountdown(seconds, endSet);
+                } else {
+                    startTimer(seconds);
+                }
+                pauseBtn.innerText = 'Pause';
+            }
+        }
+
+        function endSet() {
+            if (mode !== MODES.WORK) return;
+            stopTimer();
+            if (exercises[ex].unit === 'sec') {
+                currentSets.push(exercises[ex].value);
+            } else {
+                currentSets.push(seconds);
+            }
+            $('sets').innerHTML = currentSets.map(s => `<li>${fmt(s)}</li>`).join('');
+            // Increment completedSets and update progress after recording set time, before exercise completion
+            completedSets++;
+            updateProgress();
+            set++;
+            if (set >= exercises[ex].sets) {
+                // вправа завершена
+                const exerciseName = exercises[ex].name;
+                results.push({
+                    name: exerciseName,
+                    sets: [...currentSets],
+                    rating: null
+                });
+                ex++; set = 0; currentSets = []; $('sets').innerHTML = '';
+
+                if (ex >= exercises.length) {
+                    showExerciseRatingModal(exerciseName, () => {
+                        results[results.length - 1].rating = exerciseRatings[exerciseName];
+                        applyRatingToBalance(exerciseRatings[exerciseName]);
+                        startCooldown();
+                    });
+                    return;
+                }
+
+                renderPlan();
+                updateProgress();
+
+                showExerciseRatingModal(exerciseName, () => {
+                    results[results.length - 1].rating = exerciseRatings[exerciseName];
+                    applyRatingToBalance(exerciseRatings[exerciseName]);
+                    showExerciseRecoveryModal(exerciseRatings[exerciseName], startRecovery);
+                });
+            } else {
+                renderPlan();
+                startRecovery(); // ❌ БЕЗ МОДАЛКИ
+            }
+        }
+
+        function startRecovery(base = 60) {
+            mode = MODES.RECOVERY;
+            applyModeColors(MODES.RECOVERY);
+            $('label').innerText = 'Recovery';
+
+            startCountdown(base, showRecoveryDecisionModal);
+
+            $('controls').innerHTML = `
+    <button onclick="startSetEarly()" class="flex-1 py-3 bg-neutral-700 rounded-xl pulse-slow">
+      Start Set
+    </button>
+  `;
+        }
+
+
+
+        function startSetEarly() {
+            if (seconds > 0) {
+                recoveryBalance += Math.floor(seconds / 3);
+            }
+            startSet();
+        }
+
+
+
+        function startCooldown() {
+            ex++;
+            renderPlan();
+            updateProgress();
+            mode = MODES.COOLDOWN;
+            applyModeColors(MODES.COOLDOWN);
+            $('label').innerText = 'Cooldown';
+            recoveryStartSeconds = seconds;
+            startCountdown(300, finish);
+            $('controls').innerHTML = `<button onclick="skipCooldown()" class="flex-1 py-3 bg-neutral-700 rounded-xl pulse-slow">SKIP</button>`;
+        }
+
+        function skipCooldown() {
+            // stop active countdown
+            stopTimer();
+            finish();
+        }
+
+        function finish() {
+            stopTimer();
+
+            const sessionResults = [...results];
+            const today = new Date().toISOString().split('T')[0];
+            const starsCount = calculateStars();
+            const total = Math.floor((Date.now() - durationStart) / 1000);
+
+            const activeDay = trainingDays[activeDayId];
+            if (activeDay) {
+                activeDay.history.push({
+                    date: today,
+                    duration: total,
+                    tempoRating: starsCount,
+                    recoveryBalance,
+                    exercises: sessionResults
+                });
+                saveDays(trainingDays);
+            }
+
+            document.getElementById('finish').classList.remove('hidden');
+
+            const stars = '★'.repeat(starsCount);
+            document.getElementById('finalDuration').insertAdjacentHTML(
+                'beforebegin',
+                `<div class="mb-4">
+                    <div class="opacity-70">Tempo Rating</div>
+                    <div class="text-2xl">${stars}</div>
+                </div>`
+            );
+
+            $('finalDuration').innerText = 'DURATION ' + fmt(total);
+
+            $('summary').innerHTML = sessionResults.map(r => {
+                const t = r.sets.reduce((a, b) => a + b, 0);
+                return `<div>
+            <b>${r.name}</b>
+            <div>${r.sets.map(fmt).join(' · ')}</div>
+            <div>Total ${fmt(t)}</div>
+                ${r.rating ? `<div class="opacity-60">Rating: ${r.rating}</div>` : ''}
+            </div>`;
+            }).join('');
+
+            // cleanup — ТІЛЬКИ ТУТ
+            results = [];
+            exerciseRatings = {};
+        }
+
+        function calculateStars() {
+            if (recoveryBalance >= 40) return 5;
+            if (recoveryBalance >= 20) return 4;
+            if (recoveryBalance >= 0) return 3;
+            if (recoveryBalance >= -20) return 2;
+            return 1;
+        }
+
+        function startExtraRecovery(amount) {
+            startRecovery(amount);
+        }
+
+
+        // --- Recovery Decision Modal ---
+        function showRecoveryDecisionModal() {
+            stopTimer();
+            mode = MODES.DECISION;
+            applyModeColors('ready');
+
+            const can15 = recoveryBank >= 15;
+            const can30 = recoveryBank >= 30;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-50';
+
+            modal.innerHTML = `
+    <div class="bg-neutral-800 rounded-xl p-6 text-sm max-w-sm">
+      <div class="mb-3 font-semibold">
+        Потрібно ще відпочити?
+      </div>
+
+      <div class="flex gap-2 mb-3">
+        <button class="flex-1 px-3 py-2 rounded-xl ${can15 ? 'bg-neutral-700' : 'bg-neutral-800 opacity-40'}" ${can15 ? '' : 'disabled'}>
+          +15s
+        </button>
+        <button class="flex-1 px-3 py-2 rounded-xl ${can30 ? 'bg-neutral-700' : 'bg-neutral-800 opacity-40'}" ${can30 ? '' : 'disabled'}>
+          +30s
+        </button>
+      </div>
+
+      <button class="w-full px-3 py-2 bg-lime-400 text-black rounded-xl pulse-slow">
+        Ні, продовжуємо далі
+      </button>
+    </div>
+  `;
+
+            const [plus15, plus30, startBtn] = modal.querySelectorAll('button');
+
+            if (can15) plus15.onclick = () => { modal.remove(); startExtraRecovery(15); };
+            if (can30) plus30.onclick = () => { modal.remove(); startExtraRecovery(30); };
+
+            startBtn.onclick = () => {
+                modal.remove();
+                startSet();
+            };
+
+            document.body.appendChild(modal);
+        }
+
+        /* INIT */
+        renderDays();
+        document.getElementById('entryScreen').classList.remove('hidden');
+        document.getElementById('workoutApp').classList.add('hidden');
+    </script>
+
+    <!-- DAY EDITOR SCREEN -->
+    <div id="dayEditor" class="hidden h-screen px-6 py-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="closeDayEditor()" class="text-sm opacity-60">← Back</button>
+            <div id="saveIndicator" class="text-xs opacity-50">Saved</div>
+        </div>
+
+        <input id="dayNameInput"
+            class="w-full mb-6 text-xl bg-transparent border-b border-neutral-700 focus:outline-none" />
+
+        <div id="exerciseEditorList" class="space-y-4"></div>
+
+
+        <div class="flex justify-between gap-4">
+            <button onclick="addExerciseToEditor()" class="mt-6 px-4 py-2 bg-neutral-800 rounded-xl">
+                + Add Movement
+            </button>
+
+            <div class="flex gap-4 aling-center">
+                <button onclick="clearDayHistory()" class="mt-6 px-4 py-2 text-sm bg-yellow-400/20 rounded-xl">
+                    Clear training history
+                </button>
+
+                <button onclick="deleteTrainingDay()" class="mt-6 px-4 py-2 text-sm bg-red-400/20 rounded-xl">
+                    Delete Training Day
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+
+</body>
+<script>
+    // ---- SAVED INDICATOR HELPERS ----
+    function markSaved() {
+        const el = document.getElementById('saveIndicator');
+        if (!el) return;
+
+        el.innerHTML = '✓ Saved';
+        el.className = 'text-xs text-green-400 animate-pulse';
+
+        setTimeout(() => {
+            el.classList.remove('animate-pulse');
+        }, 800);
+    }
+    function markUnsaved() {
+        const el = document.getElementById('saveIndicator');
+        if (!el) return;
+        el.innerText = 'Saving…';
+        el.className = 'text-xs text-neutral-400';
+    }
+
+    // ---- DELETE TRAINING DAY ----
+    function deleteTrainingDay() {
+        if (!editingDayId) return;
+        if (!confirm('Delete this training day?')) return;
+
+        delete trainingDays[editingDayId];
+        saveDays(trainingDays);
+
+        editingDayId = null;
+        document.getElementById('dayEditor').classList.add('hidden');
+        document.getElementById('entryScreen').classList.remove('hidden');
+        renderDays();
+    }
+
+    function clearDayHistory() {
+        if (!editingDayId) return;
+        if (!confirm('Clear workout history for this day?')) return;
+
+        trainingDays[editingDayId].history = [];
+        saveDays(trainingDays);
+        renderExerciseEditor(trainingDays[editingDayId]);
+        markSaved();
+    }
+
+    // ---- AUTOSAVE DAY NAME ----
+    document.addEventListener('DOMContentLoaded', function () {
+        const dayNameInput = document.getElementById('dayNameInput');
+        if (dayNameInput) {
+            dayNameInput.oninput = function (e) {
+                if (!editingDayId) return;
+                trainingDays[editingDayId].name = e.target.value;
+                saveDays(trainingDays);
+                markSaved();
+            };
+        }
+    });
+</script>
+
+</html>
