@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Team Section</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Custom Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes riseFade {
+            from {
+                opacity: 0;
+                transform: translateY(var(--rise, 16px));
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Classes for JS triggering */
+        .animate-fadeInUp {
+            animation: fadeInUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-rise {
+            animation: riseFade 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            --rise: 16px;
+        }
+
+        .animate-rise-delayed {
+            animation: riseFade 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: 0.5s;
+            --rise: 10px;
+            opacity: 0;
+        }
+
+        /* Stagger delays */
+        .delay-100 {
+            animation-delay: 100ms;
+        }
+
+        .delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+
+        /* Hover Effects */
+        .card-hover-container {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .card-hover-container:hover {
+            transform: translateY(-4px);
+        }
+
+        .icon-hover-container {
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .card-hover-container:hover .icon-hover-container {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        /* Chat Animation Keyframes */
+        @keyframes msgEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typingPulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Initial state for chat items */
+        .chat-msg {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        .chat-active .chat-msg-1 {
+            animation: msgEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+        }
+
+        .chat-active .chat-msg-2 {
+            animation: msgEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.6s forwards;
+        }
+
+        .chat-active .chat-msg-3 {
+            animation: msgEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) 2.6s forwards;
+        }
+
+        .chat-active .typing-indicator {
+            animation:
+                msgEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards,
+                fadeOut 0.35s cubic-bezier(0.22, 1, 0.36, 1) 1.4s forwards,
+                msgEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) 3.8s forwards,
+                fadeOut 0.35s cubic-bezier(0.22, 1, 0.36, 1) 4.6s forwards;
+        }
+
+        .chat-active .typing-1 {
+            animation:
+                msgEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards,
+                fadeOut 0.35s cubic-bezier(0.22, 1, 0.36, 1) 1.4s forwards;
+        }
+
+        .chat-active .typing-2 {
+            animation:
+                msgEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 3.8s forwards,
+                fadeOut 0.5s cubic-bezier(0.22, 1, 0.36, 1) 4.6s forwards;
+        }
+
+        .chat-active .typing-dot {
+            animation: typingPulse 0.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+        }
+
+        .chat-active .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .chat-active .typing-dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .chat-active .typing-dot:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .chat-active .chat-msg-4 {
+            animation: msgEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) 4.7s forwards;
+        }
+
+        .chat-container {
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-[#f3f4f6]">
+
+    <section class="w-full py-16 px-4 md:px-8 overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row items-center gap-16 xl:gap-8">
+
+
+
+            <!-- Right Illustration -->
+            <div
+                class="flex w-full flex justify-center xl:justify-center relative min-h-[500px] md:min-h-[600px] items-center">
+
+
+                <!-- Composition Container -->
+                <div class="relative w-full max-w-[500px] h-[500px]">
+                    <!-- High Fidelity Illustration (Background Screen) -->
+                    <div
+                        class="absolute right-[20px] top-[120px] transform translate-x-10 xl:translate-x-0 hidden md:block animate-rise-delayed">
+                        <div class="relative w-[348px] h-[296px] overflow-hidden">
+                            <div class="absolute inset-0">
+                                <!-- Main Window -->
+                                <div class="absolute inset-[0.3%_0.18%_17.73%_0.22%]">
+
+
+                                    <svg class="block size-full left-[5%] absolute" viewBox="0 0 367 296" fill="none">
+                                        <g clip-path="url(#clip0_26_81)">
+                                            <rect x="156.853" y="254.928" width="52.653" height="36.8597"
+                                                fill="#EDF1F8" />
+                                            <rect x="156.853" y="254.928" width="52.653" height="36.8597"
+                                                fill="url(#paint0_linear_26_81)" fill-opacity="0.2" />
+                                            <rect x="123.5" y="288.5" width="119" height="7" rx="1.5" fill="white"
+                                                stroke="#D1D5DB" />
+                                            <path
+                                                d="M351.4 1H15.6C7.53664 1 1 7.53711 1 15.601V241.917C1 249.981 7.53664 256.518 15.6 256.518H351.4C359.463 256.518 366 249.981 366 241.917V15.601C366 7.53711 359.463 1 351.4 1Z"
+                                                fill="white" stroke="#D1D5DB" />
+                                            <rect x="9" y="9" width="349" height="215" rx="7" fill="#F3F3F3" />
+                                        </g>
+                                        <defs>
+                                            <linearGradient id="paint0_linear_26_81" x1="183.179" y1="254.928"
+                                                x2="183.179" y2="291.787" gradientUnits="userSpaceOnUse">
+                                                <stop />
+                                                <stop offset="1" stop-opacity="0" />
+                                            </linearGradient>
+                                            <clipPath id="clip0_26_81">
+                                                <rect width="367" height="296" fill="white" />
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
+                                </div>
+
+                                <!-- Small Elements -->
+                                <div class="absolute top-[20px] left-[30px] right-[12px] bottom-[60px]">
+
+                                    <div class="absolute top-[0%] right-[4%] w-[165px] h-[19px]">
+                                        <svg class="block size-full" viewBox="0 0 165 19" fill="none">
+                                            <g clip-path="url(#clip0_28_85)">
+                                                <path
+                                                    d="M155.718 18.4858C160.823 18.4858 164.961 14.3476 164.961 9.24291C164.961 4.13819 160.823 0 155.718 0C150.613 0 146.475 4.13819 146.475 9.24291C146.475 14.3476 150.613 18.4858 155.718 18.4858Z"
+                                                    fill="#E5E7EB" />
+                                                <path opacity="0.8"
+                                                    d="M124.127 6.698H88.3107C87.0345 6.698 86 7.73255 86 9.00872C86 10.2849 87.0345 11.3195 88.3107 11.3195H124.127C125.403 11.3195 126.438 10.2849 126.438 9.00872C126.438 7.73255 125.403 6.698 124.127 6.698Z"
+                                                    fill="#E5E7EB" />
+                                                <path opacity="0.8"
+                                                    d="M38.127 7.698H2.31073C1.03455 7.698 0 8.73255 0 10.0087C0 11.2849 1.03455 12.3195 2.31073 12.3195H38.127C39.4032 12.3195 40.4377 11.2849 40.4377 10.0087C40.4377 8.73255 39.4032 7.698 38.127 7.698Z"
+                                                    fill="#E5E7EB" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_28_85">
+                                                    <rect width="164.961" height="18.4858" fill="white" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+                                    </div>
+                                    <div class="absolute top-[37%] left-[16%] w-[162px] h-[70px]">
+                                        <svg class="block size-full" fill="none" viewBox="0 0 162.329 69.8995">
+                                            <path
+                                                d="M155.108 0.288841H7.22102C3.39248 0.288841 0.288841 3.39248 0.288841 7.22102V62.6785C0.288841 66.507 3.39248 69.6106 7.22102 69.6106H155.108C158.936 69.6106 162.04 66.507 162.04 62.6785V7.22102C162.04 3.39248 158.936 0.288841 155.108 0.288841Z"
+                                                fill="white" stroke="#E5E7EB" stroke-width="0.5" />
+                                            <path
+                                                d="M11.8425 52.2802C29.1729 52.2802 34.9497 23.3961 52.2802 34.9497C69.6106 46.5034 81.1643 46.5034 98.4947 29.1729C115.825 11.8425 127.379 40.7266 150.486 17.6193"
+                                                stroke="#129590" stroke-width="1.7" />
+                                            <path
+                                                d="M11.8425 52.2802C29.1729 52.2802 34.9497 23.3961 52.2802 34.9497C69.6106 46.5034 81.1643 46.5034 98.4947 29.1729C115.825 11.8425 127.379 40.7266 150.486 17.6193V63.8338H11.8425V52.2802Z"
+                                                fill="#129590" fill-opacity="0.05" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="absolute top-[37%] right-[4%] w-[75px] h-[70px]">
+                                        <svg class="block size-full" fill="none" viewBox="0 0 75.6763 69.8995">
+                                            <path
+                                                d="M68.4553 0.288841H7.22102C3.39248 0.288841 0.288841 3.39248 0.288841 7.22102V62.6785C0.288841 66.507 3.39248 69.6106 7.22102 69.6106H68.4553C72.2838 69.6106 75.3875 66.507 75.3875 62.6785V7.22102C75.3875 3.39248 72.2838 0.288841 68.4553 0.288841Z"
+                                                fill="white" stroke="#E5E7EB" stroke-width="0.5" />
+                                            <path
+                                                d="M64.9892 9.53176H11.8425C10.5663 9.53176 9.53175 10.5663 9.53175 11.8425C9.53175 13.1187 10.5663 14.1532 11.8425 14.1532H64.9892C66.2654 14.1532 67.2999 13.1187 67.2999 11.8425C67.2999 10.5663 66.2654 9.53176 64.9892 9.53176Z"
+                                                fill="#F3F4F6" />
+                                            <path
+                                                d="M54.0132 23.396H11.2648C10.3077 23.396 9.53175 24.1719 9.53175 25.1291C9.53175 26.0862 10.3077 26.8621 11.2648 26.8621H54.0132C54.9704 26.8621 55.7463 26.0862 55.7463 25.1291C55.7463 24.1719 54.9704 23.396 54.0132 23.396Z"
+                                                fill="#E5E7EB" />
+                                            <path
+                                                d="M59.7901 34.9497H11.2648C10.3077 34.9497 9.53175 35.7256 9.53175 36.6828C9.53175 37.6399 10.3077 38.4158 11.2648 38.4158H59.7901C60.7472 38.4158 61.5231 37.6399 61.5231 36.6828C61.5231 35.7256 60.7472 34.9497 59.7901 34.9497Z"
+                                                fill="#E5E7EB" />
+                                            <path
+                                                d="M48.2364 46.5034H11.2648C10.3077 46.5034 9.53175 47.2794 9.53175 48.2365C9.53175 49.1936 10.3077 49.9695 11.2648 49.9695H48.2364C49.1936 49.9695 49.9695 49.1936 49.9695 48.2365C49.9695 47.2794 49.1936 46.5034 48.2364 46.5034Z"
+                                                fill="#E5E7EB" />
+                                            <path
+                                                d="M54.0132 58.0569H11.2648C10.3077 58.0569 9.53175 58.8328 9.53175 59.79C9.53175 60.7471 10.3077 61.523 11.2648 61.523H54.0132C54.9704 61.523 55.7463 60.7471 55.7463 59.79C55.7463 58.8328 54.9704 58.0569 54.0132 58.0569Z"
+                                                fill="#E5E7EB" />
+                                        </svg>
+                                    </div>
+
+                                    <!-- Top Widgets -->
+                                    <div class="absolute top-[13%] left-[16%] w-[248px] h-[46px]">
+
+
+                                        <svg class="block size-full" viewBox="0 0 249 47" fill="none">
+                                            <g clip-path="url(#clip0_28_539)">
+                                                <path
+                                                    d="M68.4553 0.288818H7.221C3.39246 0.288818 0.288818 3.39247 0.288818 7.221V39.5712C0.288818 43.3997 3.39246 46.5034 7.221 46.5034H68.4553C72.2838 46.5034 75.3875 43.3997 75.3875 39.5712V7.221C75.3875 3.39247 72.2838 0.288818 68.4553 0.288818Z"
+                                                    fill="white" stroke="#E5E7EB" stroke-width="0.5" />
+                                                <path
+                                                    d="M23.3961 9.53174H14.1532C11.6008 9.53174 9.53174 11.6008 9.53174 14.1532V23.3961C9.53174 25.9485 11.6008 28.0176 14.1532 28.0176H23.3961C25.9485 28.0176 28.0176 25.9485 28.0176 23.3961V14.1532C28.0176 11.6008 25.9485 9.53174 23.3961 9.53174Z"
+                                                    fill="#E8EAEC" />
+                                                <path opacity="0.8"
+                                                    d="M41.8819 32.6389H11.8425C10.5663 32.6389 9.53174 33.6735 9.53174 34.9496C9.53174 36.2258 10.5663 37.2604 11.8425 37.2604H41.8819C43.1581 37.2604 44.1926 36.2258 44.1926 34.9496C44.1926 33.6735 43.1581 32.6389 41.8819 32.6389Z"
+                                                    fill="#ECEDEF" />
+                                                <path
+                                                    d="M155.108 0.288818H93.8734C90.0448 0.288818 86.9412 3.39246 86.9412 7.221V39.5712C86.9412 43.3997 90.0448 46.5034 93.8734 46.5034H155.108C158.936 46.5034 162.04 43.3997 162.04 39.5712V7.221C162.04 3.39246 158.936 0.288818 155.108 0.288818Z"
+                                                    fill="white" stroke="#E5E7EB" stroke-width="0.5" />
+                                                <path opacity="0.8"
+                                                    d="M122.757 32.6389H98.4948C97.2186 32.6389 96.1841 33.6735 96.1841 34.9496C96.1841 36.2258 97.2186 37.2604 98.4948 37.2604H122.757C124.034 37.2604 125.068 36.2258 125.068 34.9496C125.068 33.6735 124.034 32.6389 122.757 32.6389Z"
+                                                    fill="#E7E9EB" />
+                                                <path
+                                                    d="M241.76 0.288818H180.526C176.697 0.288818 173.594 3.39247 173.594 7.221V39.5712C173.594 43.3997 176.697 46.5034 180.526 46.5034H241.76C245.589 46.5034 248.692 43.3997 248.692 39.5712V7.221C248.692 3.39247 245.589 0.288818 241.76 0.288818Z"
+                                                    fill="white" stroke="#E5E7EB" stroke-width="0.5" />
+                                                <path opacity="0.8"
+                                                    d="M220.964 32.6392H185.147C183.871 32.6392 182.837 33.6738 182.837 34.9499C182.837 36.2261 183.871 37.2607 185.147 37.2607H220.964C222.24 37.2607 223.274 36.2261 223.274 34.9499C223.274 33.6738 222.24 32.6392 220.964 32.6392Z"
+                                                    fill="#E7E9EB" />
+                                                <path
+                                                    d="M99.0842 22.5758C99.1776 23.0425 99.3782 23.3971 99.6862 23.6398C99.9942 23.8825 100.41 24.0038 100.932 24.0038C101.595 24.0038 102.08 23.7425 102.388 23.2198C102.696 22.6971 102.85 21.8058 102.85 20.5458C102.626 20.8631 102.309 21.1105 101.898 21.2878C101.497 21.4558 101.058 21.5398 100.582 21.5398C99.9756 21.5398 99.4249 21.4185 98.9302 21.1758C98.4356 20.9238 98.0436 20.5551 97.7542 20.0698C97.4742 19.5751 97.3342 18.9778 97.3342 18.2778C97.3342 17.2511 97.6329 16.4345 98.2302 15.8278C98.8369 15.2118 99.6676 14.9038 100.722 14.9038C101.992 14.9038 102.892 15.3285 103.424 16.1778C103.966 17.0178 104.236 18.3105 104.236 20.0558C104.236 21.2598 104.134 22.2445 103.928 23.0098C103.732 23.7751 103.387 24.3538 102.892 24.7458C102.398 25.1378 101.712 25.3338 100.834 25.3338C99.8356 25.3338 99.0656 25.0725 98.5242 24.5498C97.9829 24.0271 97.6796 23.3691 97.6142 22.5758H99.0842ZM100.862 20.1958C101.422 20.1958 101.861 20.0231 102.178 19.6778C102.505 19.3231 102.668 18.8565 102.668 18.2778C102.668 17.6338 102.496 17.1345 102.15 16.7798C101.814 16.4158 101.352 16.2338 100.764 16.2338C100.176 16.2338 99.7096 16.4205 99.3642 16.7938C99.0282 17.1578 98.8602 17.6385 98.8602 18.2358C98.8602 18.8051 99.0236 19.2765 99.3502 19.6498C99.6862 20.0138 100.19 20.1958 100.862 20.1958Z"
+                                                    fill="#18938E" />
+                                                <path
+                                                    d="M105.787 23.2198V22.0158L110.491 15.2678H112.423V21.8338H113.725V23.2198H112.423V25.3478H110.855V23.2198H105.787ZM110.925 16.8918L107.621 21.8338H110.925V16.8918Z"
+                                                    fill="#18938E" />
+                                                <path
+                                                    d="M114.795 17.6058C114.795 16.9245 114.991 16.3925 115.383 16.0098C115.785 15.6178 116.298 15.4218 116.923 15.4218C117.549 15.4218 118.057 15.6178 118.449 16.0098C118.851 16.3925 119.051 16.9245 119.051 17.6058C119.051 18.2871 118.851 18.8238 118.449 19.2158C118.057 19.6078 117.549 19.8038 116.923 19.8038C116.298 19.8038 115.785 19.6078 115.383 19.2158C114.991 18.8238 114.795 18.2871 114.795 17.6058ZM123.335 15.6038L117.749 25.3478H116.181L121.767 15.6038H123.335ZM116.923 16.3878C116.335 16.3878 116.041 16.7938 116.041 17.6058C116.041 18.4271 116.335 18.8378 116.923 18.8378C117.203 18.8378 117.418 18.7398 117.567 18.5438C117.726 18.3385 117.805 18.0258 117.805 17.6058C117.805 16.7938 117.511 16.3878 116.923 16.3878ZM120.493 23.3318C120.493 22.6505 120.689 22.1185 121.081 21.7358C121.483 21.3438 121.996 21.1478 122.621 21.1478C123.237 21.1478 123.741 21.3438 124.133 21.7358C124.535 22.1185 124.735 22.6505 124.735 23.3318C124.735 24.0131 124.535 24.5498 124.133 24.9418C123.741 25.3338 123.237 25.5298 122.621 25.5298C121.996 25.5298 121.483 25.3338 121.081 24.9418C120.689 24.5498 120.493 24.0131 120.493 23.3318ZM122.607 22.1138C122.019 22.1138 121.725 22.5198 121.725 23.3318C121.725 24.1438 122.019 24.5498 122.607 24.5498C123.195 24.5498 123.489 24.1438 123.489 23.3318C123.489 22.5198 123.195 22.1138 122.607 22.1138Z"
+                                                    fill="#18938E" />
+                                                <path opacity="0.8"
+                                                    d="M122.816 33.3501H98.5536C97.2775 33.3501 96.2429 34.3846 96.2429 35.6608C96.2429 36.937 97.2775 37.9716 98.5536 37.9716H122.816C124.092 37.9716 125.127 36.937 125.127 35.6608C125.127 34.3846 124.092 33.3501 122.816 33.3501Z"
+                                                    fill="#E7E9EB" />
+                                                <path
+                                                    d="M155.256 20.3479C155.256 25.8707 150.779 30.3479 145.256 30.3479C139.734 30.3479 135.256 25.8707 135.256 20.3479C135.256 14.8251 139.734 10.3479 145.256 10.3479C150.779 10.3479 155.256 14.8251 155.256 20.3479ZM136.455 20.3479C136.455 25.2085 140.396 29.1489 145.256 29.1489C150.117 29.1489 154.057 25.2085 154.057 20.3479C154.057 15.4873 150.117 11.5469 145.256 11.5469C140.396 11.5469 136.455 15.4873 136.455 20.3479Z"
+                                                    fill="#E5E7EB" />
+                                                <path
+                                                    d="M155.256 20.3479C155.256 22.6931 154.432 24.9636 152.928 26.7627C151.423 28.5618 149.335 29.7749 147.026 30.19C144.718 30.6051 142.338 30.1958 140.301 29.0336C138.264 27.8714 136.7 26.0303 135.883 23.8321C135.066 21.6339 135.047 19.2184 135.831 17.0079C136.614 14.7975 138.149 12.9326 140.168 11.7393C142.187 10.546 144.561 10.1002 146.875 10.4798C149.189 10.8595 151.297 12.0404 152.828 13.8161L151.85 14.6605C150.516 13.1143 148.681 12.086 146.666 11.7554C144.651 11.4249 142.584 11.813 140.826 12.8521C139.068 13.8911 137.731 15.5149 137.049 17.4397C136.367 19.3644 136.383 21.4677 137.095 23.3817C137.806 25.2958 139.168 26.8989 140.941 27.9108C142.715 28.9228 144.788 29.2792 146.798 28.9177C148.807 28.5563 150.626 27.5 151.936 25.9335C153.246 24.367 153.964 22.3899 153.964 20.3479H155.256Z"
+                                                    fill="#1E918C" />
+                                                <path
+                                                    d="M190.564 16.3737L186.672 25.3477H185.062L188.996 16.5417H183.816V15.1837H190.564V16.3737Z"
+                                                    fill="#FF0303" />
+                                                <path
+                                                    d="M191.93 20.1117C191.93 18.4971 192.201 17.237 192.742 16.3317C193.293 15.4171 194.236 14.9597 195.57 14.9597C196.905 14.9597 197.843 15.4171 198.384 16.3317C198.935 17.237 199.21 18.4971 199.21 20.1117C199.21 21.7451 198.935 23.0237 198.384 23.9477C197.843 24.8624 196.905 25.3197 195.57 25.3197C194.236 25.3197 193.293 24.8624 192.742 23.9477C192.201 23.0237 191.93 21.7451 191.93 20.1117ZM197.642 20.1117C197.642 19.3557 197.591 18.7164 197.488 18.1937C197.395 17.6711 197.199 17.2464 196.9 16.9197C196.602 16.5837 196.158 16.4157 195.57 16.4157C194.982 16.4157 194.539 16.5837 194.24 16.9197C193.942 17.2464 193.741 17.6711 193.638 18.1937C193.545 18.7164 193.498 19.3557 193.498 20.1117C193.498 20.8957 193.545 21.5537 193.638 22.0857C193.732 22.6177 193.928 23.0471 194.226 23.3737C194.534 23.7004 194.982 23.8637 195.57 23.8637C196.158 23.8637 196.602 23.7004 196.9 23.3737C197.208 23.0471 197.409 22.6177 197.502 22.0857C197.596 21.5537 197.642 20.8957 197.642 20.1117Z"
+                                                    fill="#FF0303" />
+                                                <path
+                                                    d="M200.647 17.6057C200.647 16.9244 200.843 16.3924 201.235 16.0097C201.636 15.6177 202.15 15.4217 202.775 15.4217C203.4 15.4217 203.909 15.6177 204.301 16.0097C204.702 16.3924 204.903 16.9244 204.903 17.6057C204.903 18.2871 204.702 18.8237 204.301 19.2157C203.909 19.6077 203.4 19.8037 202.775 19.8037C202.15 19.8037 201.636 19.6077 201.235 19.2157C200.843 18.8237 200.647 18.2871 200.647 17.6057ZM209.187 15.6037L203.601 25.3477H202.033L207.619 15.6037H209.187ZM202.775 16.3877C202.187 16.3877 201.893 16.7937 201.893 17.6057C201.893 18.4271 202.187 18.8377 202.775 18.8377C203.055 18.8377 203.27 18.7397 203.419 18.5437C203.578 18.3384 203.657 18.0257 203.657 17.6057C203.657 16.7937 203.363 16.3877 202.775 16.3877ZM206.345 23.3317C206.345 22.6504 206.541 22.1184 206.933 21.7357C207.334 21.3437 207.848 21.1477 208.473 21.1477C209.089 21.1477 209.593 21.3437 209.985 21.7357C210.386 22.1184 210.587 22.6504 210.587 23.3317C210.587 24.0131 210.386 24.5497 209.985 24.9417C209.593 25.3337 209.089 25.5297 208.473 25.5297C207.848 25.5297 207.334 25.3337 206.933 24.9417C206.541 24.5497 206.345 24.0131 206.345 23.3317ZM208.459 22.1137C207.871 22.1137 207.577 22.5197 207.577 23.3317C207.577 24.1437 207.871 24.5497 208.459 24.5497C209.047 24.5497 209.341 24.1437 209.341 23.3317C209.341 22.5197 209.047 22.1137 208.459 22.1137Z"
+                                                    fill="#FF0303" />
+                                                <path opacity="0.8"
+                                                    d="M221.022 33.3501H185.206C183.93 33.3501 182.895 34.3846 182.895 35.6608C182.895 36.937 183.93 37.9716 185.206 37.9716H221.022C222.298 37.9716 223.333 36.937 223.333 35.6608C223.333 34.3846 222.298 33.3501 221.022 33.3501Z"
+                                                    fill="#E7E9EB" />
+                                                <rect x="226.256" y="21.3477" width="1" height="7" rx="0.5"
+                                                    fill="#FF0303" />
+                                                <rect x="230.256" y="16.3477" width="1" height="12" rx="0.5"
+                                                    fill="#FF0303" />
+                                                <rect x="234.256" y="10.3477" width="1" height="18" rx="0.5"
+                                                    fill="#FF0303" />
+                                                <rect x="238.256" y="15.3477" width="1" height="13" rx="0.5"
+                                                    fill="#FF0303" />
+                                                <rect x="242.256" y="12.3477" width="1" height="16" rx="0.5"
+                                                    fill="#FF0303" />
+                                            </g>
+                                            <defs>
+                                                <clipPath id="clip0_28_539">
+                                                    <rect width="248.981" height="46.7923" fill="white" />
+                                                </clipPath>
+                                            </defs>
+                                        </svg>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone Mockup (Foreground) -->
+                    <div class="absolute left-0 md:left-10 top-0 z-10 animate-rise">
+                        <div class="relative shrink-0 w-[244px] h-[500px]">
+                            <!-- Phone Body -->
+                            <div class="absolute inset-[0_-0.17%_0_0.08%] drop-shadow-2xl">
+                                <svg class="block size-full" fill="none" preserveAspectRatio="none"
+                                    viewBox="0 0 244 500">
+                                    <path
+                                        d="M208.698 0C227.048 0 241.924 14.8623 241.924 33.1954V124.482C243.071 124.482 244 125.41 244 126.556V178.424C244 179.569 243.071 180.497 241.924 180.498V466.805C241.924 485.138 227.048 500 208.698 500H35.3019C16.952 500 2.07711 485.138 2.07711 466.805V177.904H1.03855C0.465116 177.904 0 177.439 0 176.867V145.746C0.000159421 145.174 0.465214 144.71 1.03855 144.71H2.07711V136.411H1.03855C0.465145 136.411 4.68953e-05 135.947 0 135.374V104.254C0 103.681 0.465116 103.216 1.03855 103.216H2.07711V86.6189H1.03855C0.465214 86.6189 0.000159421 86.154 0 85.5813V69.5024C0 68.9295 0.465116 68.4648 1.03855 68.4648H2.07711V33.1954C2.07711 14.8623 16.9521 0.000146422 35.3019 0H208.698Z"
+                                        fill="white" />
+                                </svg>
+                            </div>
+
+                            <!-- Screen Content -->
+                            <div
+                                class="absolute bg-[#eee] h-[488px] w-[228px] left-[calc(50%+0.31px)] top-1/2 translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-[28px]">
+                                <!-- Top Header Background -->
+                                <div class="absolute bg-[#129590] h-[113px] left-[-20.2px] top-[-50px] w-[266px]"></div>
+
+                                <!-- Phone Header -->
+                                <div
+                                    class="absolute content-stretch flex gap-[5.759px] items-center left-[7.92px] top-[16.27px]">
+                                    <div class="h-[16.126px] relative shrink-0 w-[21.886px]">
+                                        <svg class="block size-full" fill="none" preserveAspectRatio="none"
+                                            viewBox="0 0 21.8856 16.1262">
+                                            <g>
+                                                <path d="M14.9744 8.47546H3.45566" stroke="white" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="1.34385" />
+                                                <path d="M8.15914 13.2748L3.45566 8.57128L8.15914 3.8678" stroke="white"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="1.34385" />
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <div class="content-stretch flex gap-[5.759px] items-center relative shrink-0">
+                                        <div
+                                            class="content-stretch flex h-[32.437px] items-center pl-0 pr-[5.572px] py-0 relative shrink-0">
+                                            <div class="mr-[-5.572px] relative shrink-0 size-[32.437px]">
+                                                <!-- Replaced figma:asset with placeholder -->
+                                                <img alt="Support Agent" class="block max-w-none size-full rounded-full"
+                                                    src="https://i.pravatar.cc/150?img=32" />
+                                            </div>
+                                            <div class="absolute left-[25.47px] size-[5.572px] top-[24.58px]">
+                                                <svg class="block size-full" fill="none" preserveAspectRatio="none"
+                                                    viewBox="0 0 5.57201 5.57201">
+                                                    <circle cx="2.78601" cy="2.78601" fill="#16FF31" r="2.78601" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="content-stretch flex flex-col items-start leading-[1.3] not-italic relative shrink-0 text-white tracking-[0.2px]">
+                                            <p class="font-medium relative shrink-0 text-[12px] text-nowrap">
+                                                Akurateco Support</p>
+                                            <p
+                                                class="font-light min-w-full opacity-70 relative shrink-0 text-[10px] w-[min-content]">
+                                                Online</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chat Sequence Loop Container -->
+                                <div id="chat-container" class="absolute inset-0 chat-container chat-cycle-active">
+                                    <div
+                                        class="absolute bg-[#173244] content-stretch flex items-center left-[39.79px] px-[12px] py-[8px] rounded-[16px] w-[177.388px] top-[77.94px] chat-msg chat-msg-1">
+                                        <p
+                                            class="basis-0 font-sans grow leading-[1.3] min-h-px min-w-px not-italic relative shrink-0 text-[12px] text-white">
+                                            Hi! We've just connected another acquirer, and I'd like to set up routing &
+                                            cascading.
+                                        </p>
+                                    </div>
+
+                                    <!-- Typing Indicator -->
+                                    <div
+                                        class="absolute bg-white flex items-center justify-center gap-1 px-[12px] py-[12px] rounded-[16px] w-[50px]
+                                                                                left-[8.37px] top-[170px] opacity-0 typing-indicator typing-1">
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                    </div>
+
+
+                                    <div
+                                        class="absolute bg-white content-stretch flex items-center left-[8.37px] px-[12px] py-[8px] rounded-[16px] w-[183.47px] top-[170px] chat-msg chat-msg-2">
+                                        <p
+                                            class="basis-0 font-sans grow leading-[1.3] min-h-px min-w-px not-italic relative shrink-0 text-[#173244] text-[12px]">
+                                            Hello! What rules would you like to apply for routing?
+                                        </p>
+                                    </div>
+
+                                    <div
+                                        class="absolute bg-[#173244] content-stretch flex items-center left-[39.79px] px-[12px] py-[8px] rounded-[16px] w-[177.388px] top-[230px] chat-msg chat-msg-3">
+                                        <p
+                                            class="basis-0 font-sans grow leading-[1.3] min-h-px min-w-px not-italic relative shrink-0 text-[12px] text-white">
+                                            I'd like all DE, BE, and FR traffic to go through MID 1 to optimise costs.
+                                        </p>
+                                    </div>
+
+
+
+                                    <!-- Typing before chat-msg-4 -->
+                                    <div class="absolute bg-white flex items-center justify-center gap-1 px-[12px] py-[12px] rounded-[16px] w-[50px]
+                                            left-[8.37px] top-[305px] opacity-0 typing-indicator typing-2">
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                        <div class="w-1.5 h-1.5 bg-[#173244] rounded-full typing-dot"></div>
+                                    </div>
+
+                                    <div
+                                        class="absolute bg-white content-stretch flex items-center left-[8.37px] px-[12px] py-[8px] rounded-[16px] w-[183.47px] top-[305px] chat-msg chat-msg-4">
+                                        <p
+                                            class="basis-0 font-sans grow leading-[1.3] min-h-px min-w-px not-italic relative shrink-0 text-[#173244] text-[12px]">
+                                            ✅ Perfect, we can configure that. Let's schedule a quick call — I'll walk
+                                            you through the setup and show you the best configuration options.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Phone Input -->
+                                <div
+                                    class="absolute bg-white content-stretch flex items-center justify-between left-[7.92px] pl-[11.519px] pr-[5.759px] py-[5.759px] rounded-[1151.87px] top-[432.51px] w-[209.641px]">
+                                    <p
+                                        class="font-medium leading-[1.5] not-italic opacity-50 relative shrink-0 text-[12px] text-black text-nowrap">
+                                        Enter a message</p>
+                                    <div class="flex items-center justify-center relative shrink-0 size-[23.037px]">
+                                        <div
+                                            class="bg-[#ee4a2b] content-stretch flex flex-col items-center justify-center relative rounded-[19.198px] size-[23.037px] rotate-90">
+                                            <!-- Arrow/Send icon -->
+                                            <div
+                                                class="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0">
+                                                <div
+                                                    class="[grid-area:1_/_1] flex h-[2.896px] items-center justify-center ml-[2.57px] mt-[6.76px] relative w-[8.367px] rotate-180">
+                                                    <div class="h-[2.896px] relative w-[8.367px]">
+                                                        <svg class="block size-full" fill="none"
+                                                            viewBox="0 0 8.36665 2.89617">
+                                                            <path d="M4.18331 0V2.1721L0 2.89614L4.18331 0Z"
+                                                                fill="white" />
+                                                            <path
+                                                                d="M4.18334 3.48316e-05V2.17214L8.36665 2.89617L4.18334 3.48316e-05Z"
+                                                                fill="white" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    class="[grid-area:1_/_1] h-[10.297px] ml-0 mt-0 relative w-[13.515px]">
+                                                    <svg class="block size-full" fill="none"
+                                                        viewBox="0 0 13.5153 10.2974">
+                                                        <path
+                                                            d="M6.75765 7.06744e-05V7.7231L0 10.2974L6.75765 7.06744e-05Z"
+                                                            fill="white" />
+                                                        <path
+                                                            d="M6.75768 2.74986e-06V7.72304L13.5153 10.2974L6.75768 2.74986e-06Z"
+                                                            fill="white" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Home Indicator -->
+                                <div class="absolute bottom-[8px] left-0 right-0 flex justify-center">
+                                    <div class="bg-[#989898] h-[2.6px] w-[73px] rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        // Simple script to handle the chat loop
+        const chatContainer = document.getElementById('chat-container');
+
+        function resetChat() {
+            chatContainer.classList.remove('chat-active');
+            void chatContainer.offsetWidth;
+            chatContainer.classList.add('chat-active');
+        }
+
+        // Start initial cycle
+        setTimeout(() => {
+            chatContainer.classList.add('chat-active');
+        }, 120);
+
+        // Loop every 8.5 seconds
+        setTimeout(function loop() {
+            resetChat();
+            setTimeout(loop, 8500);
+        }, 8500);
+    </script>
+</body>
+
+</html>
