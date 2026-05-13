@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>БЛОК 2 — Задня лінія + спина</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ['Anton', 'sans-serif'],
+        sans: ['Manrope', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        ink: '#0a0a0a',
+        paper: '#f5f5f0',
+        acid: '#c6f432',
+        dim: '#1a1a1a',
+        line: '#262626',
+        muted: '#737373',
+      },
+    },
+  },
+};
+</script>
+
+<style>
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: #0a0a0a;
+    color: #f5f5f0;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Subtle grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .display { font-family: 'Anton', sans-serif; letter-spacing: -0.01em; line-height: 0.9; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Marquee header */
+  .marquee {
+    display: flex;
+    overflow: hidden;
+    border-block: 1px solid #262626;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 2.5rem;
+    padding-block: 0.65rem;
+    white-space: nowrap;
+    animation: scroll 32s linear infinite;
+  }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Checkbox — pure CSS */
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .check .box {
+    width: 28px; height: 28px;
+    border: 1.5px solid #404040;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    background: #0a0a0a;
+  }
+  .check .box svg { opacity: 0; transform: scale(0.6); transition: all 0.15s ease; }
+  .check input:checked + .box {
+    background: #c6f432;
+    border-color: #c6f432;
+  }
+  .check input:checked + .box svg { opacity: 1; transform: scale(1); }
+  .check input:checked ~ .label { color: #525252; text-decoration: line-through; text-decoration-thickness: 1px; }
+  .check { cursor: pointer; }
+  .check:active .box { transform: scale(0.94); }
+
+  /* Card hover (desktop) */
+  @media (hover: hover) {
+    .exercise-card:hover .num { color: #c6f432; }
+    .exercise-card:hover { border-color: #404040; }
+  }
+
+  /* Reveal on load */
+  .reveal { opacity: 0; transform: translateY(8px); animation: reveal 0.55s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes reveal { to { opacity: 1; transform: none; } }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    background: #c6f432;
+    box-shadow: 0 0 0 0 rgba(198, 244, 50, 0.7);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(198, 244, 50, 0.55); }
+    70%  { box-shadow: 0 0 0 10px rgba(198, 244, 50, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(198, 244, 50, 0); }
+  }
+
+  /* Dotted divider */
+  .dotted {
+    background-image: radial-gradient(circle, #404040 1px, transparent 1px);
+    background-size: 8px 8px;
+    background-repeat: repeat-x;
+    background-position: left center;
+    height: 1px;
+  }
+
+  /* Tag */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid #262626;
+    border-radius: 999px;
+    color: #a3a3a3;
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- Top bar -->
+  <header class="sticky top-0 z-50 bg-ink/90 backdrop-blur border-b border-line">
+    <div class="max-w-2xl mx-auto px-5 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="pulse-dot"></span>
+        <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-400">In session</span>
+      </div>
+      <div class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">Block 02 / 04</div>
+    </div>
+  </header>
+
+  <!-- Marquee -->
+  <div class="marquee bg-ink">
+    <div class="marquee-track mono text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+      <span>Posterior chain</span><span>•</span>
+      <span>Back focus</span><span>•</span>
+      <span>Bike → strength</span><span>•</span>
+      <span>Tempo control</span><span>•</span>
+      <span>No ego lifts</span><span>•</span>
+      <span>Posterior chain</span><span>•</span>
+      <span>Back focus</span><span>•</span>
+      <span>Bike → strength</span><span>•</span>
+      <span>Tempo control</span><span>•</span>
+      <span>No ego lifts</span><span>•</span>
+    </div>
+  </div>
+
+  <main class="max-w-2xl mx-auto px-5 pb-32">
+
+    <!-- HERO -->
+    <section class="pt-10 pb-8 reveal" style="animation-delay: 0.05s">
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="mono text-[11px] uppercase tracking-[0.2em] text-acid">Block</span>
+        <span class="display text-acid text-5xl">02</span>
+      </div>
+      <h1 class="display text-[clamp(2.75rem,11vw,4.5rem)] text-paper">
+        ЗАДНЯ&nbsp;ЛІНІЯ<br>
+        <span class="text-neutral-500">+ СПИНА</span>
+      </h1>
+      <div class="dotted my-6"></div>
+      <div class="flex flex-wrap gap-2">
+        <span class="tag">Cardio + strength</span>
+        <span class="tag">~60 хв</span>
+        <span class="tag">Інтенсивність: средн.</span>
+      </div>
+    </section>
+
+    <!-- BIKE -->
+    <section class="reveal" style="animation-delay: 0.15s">
+      <div class="flex items-end justify-between mb-4">
+        <h2 class="display text-2xl text-paper">01 · Вело</h2>
+        <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">warm-up</span>
+      </div>
+
+      <div class="border border-line rounded-2xl overflow-hidden">
+        <div class="bg-dim p-5 sm:p-6">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="display text-5xl sm:text-6xl text-acid">30</span>
+            <span class="display text-3xl sm:text-4xl text-neutral-600">–35</span>
+            <span class="mono text-xs uppercase tracking-wider text-neutral-400 ml-1">хв</span>
+          </div>
+          <p class="text-sm text-neutral-400">Більш силовий режим</p>
+        </div>
+
+        <div class="grid grid-cols-2 divide-x divide-line border-t border-line">
+          <div class="p-4 sm:p-5">
+            <div class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 mb-2">Пульс</div>
+            <div class="flex items-baseline gap-1">
+              <span class="mono text-2xl sm:text-3xl text-paper">130</span>
+              <span class="text-neutral-600">–</span>
+              <span class="mono text-2xl sm:text-3xl text-paper">150</span>
+            </div>
+          </div>
+          <div class="p-4 sm:p-5">
+            <div class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 mb-2">Каденс</div>
+            <div class="flex items-baseline gap-1">
+              <span class="mono text-2xl sm:text-3xl text-paper">70</span>
+              <span class="text-neutral-600">–</span>
+              <span class="mono text-2xl sm:text-3xl text-paper">90</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strength section title -->
+    <section class="pt-14 pb-4 reveal" style="animation-delay: 0.25s">
+      <div class="flex items-end justify-between mb-2">
+        <h2 class="display text-3xl text-paper">Силовий блок</h2>
+        <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">6 вправ</span>
+      </div>
+      <div class="dotted"></div>
+    </section>
+
+    <!-- EX 1 — Румунська тяга -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.3s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">01</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Румунська тяга</h3>
+        </div>
+      </div>
+
+      <div class="mt-5 space-y-3">
+        <label class="check flex items-center gap-3">
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-xl text-neutral-300">Робоча вага</span>
+            <span class="mono text-paper"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+          </span>
+        </label>
+
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">1 Set</span>
+            <span class="mono text-paper text-xl">12 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">2 Set</span>
+            <span class="mono text-paper text-xl">12 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">3 Set</span>
+            <span class="mono text-paper text-xl">12 reps</span>
+          </span>
+        </label>
+      </div>
+    </article>
+
+    <!-- EX 2 — Ягодичний міст -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.35s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">02</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Ягодичний міст</h3>
+        </div>
+      </div>
+
+      <div class="mt-5 space-y-3">
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">1 Set</span>
+            <span class="mono text-paper text-xl">15 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">2 Set</span>
+            <span class="mono text-paper text-xl">15 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">3 Set</span>
+            <span class="mono text-paper text-xl">15 reps</span>
+          </span>
+        </label>
+
+        <div class="flex items-start gap-3 pt-2 border-t border-line/60">
+          <svg class="mt-1 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c6f432" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <p class="text-sm text-neutral-300">Пауза <span class="mono text-paper">1 сек</span> вгорі</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- EX 3 — Тяга резинки / Підтягування -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.4s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">03</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Тяга резинки <span class="text-neutral-600">/</span> Підтягування</h3>
+          <p class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 mt-1">Один з варіантів</p>
+        </div>
+      </div>
+
+      <!-- Variant A -->
+      <div class="mt-5 border border-line rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-dim border-b border-line">
+          <span class="mono text-[10px] uppercase tracking-[0.15em] text-acid">Варіант A</span>
+          <span class="text-xs text-neutral-400">Тяга резинки</span>
+        </div>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 1</span>
+            <span class="mono text-paper text-xl">12</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper text-xl">12</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
+            <span class="mono text-paper text-xl">12</span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Variant B -->
+      <div class="mt-3 border border-line rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-dim border-b border-line">
+          <span class="mono text-[10px] uppercase tracking-[0.15em] text-acid">Варіант B</span>
+          <span class="text-xs text-neutral-400">Підтягування з резинкою</span>
+        </div>
+        <div class="p-4 space-y-3">
+          <label class="check flex items-center gap-3">
+            <input type="checkbox" />
+            <span class="box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            <span class="label flex-1 flex items-baseline justify-between gap-3">
+              <span class="text-sm text-neutral-300">Set 1</span>
+              <span class="mono text-paper text-xl">3</span>
+            </span>
+          </label>
+          <label class="check flex items-center gap-3">
+            <input type="checkbox" />
+            <span class="box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            <span class="label flex-1 flex items-baseline justify-between gap-3">
+              <span class="text-sm text-neutral-300">Set 2</span>
+              <span class="mono text-paper text-xl">3</span>
+            </span>
+          </label>
+          <label class="check flex items-center gap-3">
+            <input type="checkbox" />
+            <span class="box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            <span class="label flex-1 flex items-baseline justify-between gap-3">
+              <span class="text-sm text-neutral-300">Set 3</span>
+              <span class="mono text-paper text-xl">3</span>
+            </span>
+          </label>
+          <div class="flex items-start gap-3 pt-3 border-t border-line/60">
+            <svg class="mt-1 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c6f432" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>
+            <p class="text-sm text-neutral-300">Навіть неповна амплітуда — <span class="text-paper">нормально</span></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- EX 4 — Dead bug -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.45s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">04</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Dead bug</h3>
+        </div>
+      </div>
+
+      <div class="mt-5 space-y-3">
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 1</span>
+            <span class="mono text-paper text-xl">10 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper text-xl">10 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
+            <span class="mono text-paper text-xl">10 reps</span>
+          </span>
+        </label>
+        <div class="flex items-center gap-2 pt-2">
+          <span class="tag" style="border-color: rgba(198,244,50,0.3); color: #c6f432;">Темп: повільно</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- EX 5 — Турнік -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.5s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">05</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Турнік</h3>
+        </div>
+      </div>
+
+      <!-- Sub: Вис -->
+      <div class="mt-5 border border-line rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-dim border-b border-line">
+          <span class="text-sm text-paper">Вис</span>
+          <span class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500">Static</span>
+        </div>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 1</span>
+            <span class="mono text-paper"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Sub: Негативні -->
+      <div class="mt-3 border border-line rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-dim border-b border-line">
+          <span class="text-sm text-paper">Негативні підтягування</span>
+          <span class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500">Eccentric</span>
+        </div>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 1</span>
+            <span class="mono text-paper text-xl">3 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper text-xl">3 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
+            <span class="mono text-paper text-xl">3 reps</span>
+          </span>
+        </label>
+      </div>
+    </article>
+
+    <!-- EX 6 — Бруси -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.55s">
+      <div class="flex items-start gap-4">
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">06</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Бруси <span class="text-neutral-500 text-lg">— адаптація</span></h3>
+        </div>
+      </div>
+
+      <div class="mt-4 mb-4 px-3 py-2.5 rounded-lg bg-dim border border-line/60 flex items-start gap-2.5">
+        <svg class="mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c6f432" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <p class="text-xs text-neutral-300">Поки <span class="text-paper">без віджимань</span></p>
+      </div>
+
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-dim border-b border-line">
+          <span class="text-sm text-paper">Утримання в упорі</span>
+          <span class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500">Static hold</span>
+        </div>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 1</span>
+            <span class="mono text-paper"><span class="text-xl">15</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper"><span class="text-xl">15</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
+            <span class="mono text-paper"><span class="text-xl">15</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+      </div>
+    </article>
+
+    <!-- Outro -->
+    <section class="mt-14 reveal" style="animation-delay: 0.65s">
+      <div class="dotted mb-6"></div>
+      <div class="flex items-end justify-between">
+        <div>
+          <p class="mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-2">Кінець блоку</p>
+          <p class="display text-3xl text-paper">Холодок · вода · білок</p>
+        </div>
+        <span class="display text-6xl text-neutral-800">02</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating bottom bar -->
+  <div class="fixed bottom-0 inset-x-0 bg-gradient-to-t from-ink via-ink to-transparent pt-8 pb-4 pointer-events-none">
+    <div class="max-w-2xl mx-auto px-5">
+      <div class="pointer-events-auto bg-dim/95 backdrop-blur border border-line rounded-full px-5 py-3 flex items-center justify-between shadow-2xl">
+        <div class="flex items-center gap-2.5">
+          <span class="pulse-dot"></span>
+          <span class="mono text-[11px] uppercase tracking-[0.12em] text-neutral-300">Block 02 · в процесі</span>
+        </div>
+        <span class="mono text-[11px] uppercase tracking-[0.15em] text-acid">Go →</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
