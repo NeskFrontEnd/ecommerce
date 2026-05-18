@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0a0a0a" />
 <title>Ryvex | Fitness Planner</title>
 <script src="https://cdn.tailwindcss.com"></script>
+
 <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 
@@ -16,6 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <meta name="apple-mobile-web-app-title" content="Ryvex">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -166,7 +168,7 @@ tailwind.config = {
         <span class="pulse-dot"></span>
         <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-400">In session</span>
       </div>
-      <div class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">Block 03 / 03</div>
+      <div class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">Block 01 / 03</div>
     </div>
   </header>
 
@@ -190,22 +192,21 @@ tailwind.config = {
 
     <!-- HERO -->
     <section class="pt-10 pb-8 reveal" style="animation-delay: 0.05s">
-      
       <div class="flex flex-wrap gap-2 mb-20">
-        <span class="tag px-16 py-4"><a href="workout-block.html">Block 01</a></span>
+        <span class="tag px-16 py-4 border-acid text-acid"><a href="workout-block.html">Block 01</a></span>
         <span class="tag px-16 py-4"><a href="workout-block-2.html">Block 02</a></span>
-        <span class="tag px-16 py-4 border-acid text-acid"><a href="workout-block-3.html">Block 03</a></span>
+        <span class="tag px-16 py-4"><a href="workout-block-3.html">Block 03</a></span>
       </div>
 
       <div class="dotted my-6"></div>
 
       <div class="flex items-baseline gap-3 mb-3">
         <span class="mono text-[11px] uppercase tracking-[0.2em] text-acid">Block</span>
-        <span class="display text-acid text-5xl">03</span>
+        <span class="display text-acid text-5xl">01</span>
       </div>
       <h1 class="display text-[clamp(2.75rem,11vw,4.5rem)] text-paper">
-        ВЕРХ<br>
-        <span class="text-neutral-500">+ СТАБІЛІЗАЦІЯ</span>
+        СИЛА<br>
+        <span class="text-neutral-500">+ФУНДАМЕНТ</span>
       </h1>
       <div class="dotted my-6"></div>
       <div class="flex flex-wrap gap-2">
@@ -229,7 +230,7 @@ tailwind.config = {
             <span class="display text-3xl sm:text-4xl text-neutral-600">–30</span>
             <span class="mono text-xs uppercase tracking-wider text-neutral-400 ml-1">хв</span>
           </div>
-          <p class="text-sm text-neutral-400">Легший режим</p>
+          <p class="text-sm text-neutral-400">Лайт / середній режим</p>
         </div>
 
         <div class="grid grid-cols-2 divide-x divide-line border-t border-line">
@@ -244,7 +245,7 @@ tailwind.config = {
           <div class="p-4 sm:p-5">
             <div class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 mb-2">Каденс</div>
             <div class="flex items-baseline gap-1">
-              <span class="mono text-2xl sm:text-3xl text-paper">70</span>
+              <span class="mono text-2xl sm:text-3xl text-paper">75</span>
               <span class="text-neutral-600">–</span>
               <span class="mono text-2xl sm:text-3xl text-paper">90</span>
             </div>
@@ -257,7 +258,7 @@ tailwind.config = {
     <section class="pt-14 pb-4 reveal" style="animation-delay: 0.25s">
       <div class="flex items-end justify-between mb-2">
         <h2 class="display text-3xl text-paper">Силовий блок</h2>
-        <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">6 вправ</span>
+        <span class="mono text-[11px] uppercase tracking-[0.15em] text-neutral-500">5 вправ</span>
       </div>
       <div class="dotted"></div>
     </section>
@@ -267,7 +268,8 @@ tailwind.config = {
       <div class="flex items-start gap-4">
         <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">01</span>
         <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Жим гантелей вверх</h3>
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Goblet squat</h3>
+          <p class="mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 mt-1">(присідання з гантеллю)</p>
         </div>
       </div>
 
@@ -275,7 +277,7 @@ tailwind.config = {
         <label class="check flex items-center gap-3">
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-xl text-neutral-300">Робоча вага</span>
-            <span class="mono text-paper"><span class="text-xl">6 - 8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+            <span class="mono text-paper"><span class="text-xl">11</span> <span class="text-xs text-neutral-500">кг</span></span>
           </span>
         </label>
 
@@ -285,7 +287,7 @@ tailwind.config = {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+            <span class="text-sm text-neutral-300">1 Set</span>
             <span class="mono text-paper text-xl">12 reps</span>
           </span>
         </label>
@@ -295,8 +297,8 @@ tailwind.config = {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">10 reps</span>
+            <span class="text-sm text-neutral-300">2 Set</span>
+            <span class="mono text-paper text-xl">12 reps</span>
           </span>
         </label>
         <label class="check flex items-center gap-3">
@@ -305,71 +307,82 @@ tailwind.config = {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">10 reps</span>
+            <span class="text-sm text-neutral-300">3 Set</span>
+            <span class="mono text-paper text-xl">12 reps</span>
           </span>
         </label>
       </div>
     </article>
 
-    <!-- EX 2 — Ягодичний міст -->
+    <!-- EX 2 — Жим гантелей лежачи -->
     <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.35s">
       <div class="flex items-start gap-4">
         <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">02</span>
         <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Розводка лежачи</h3>
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Жим гантелей лежачи</h3>
+          <span class="mono text-paper"><span class="text-xl">(піраміда)</span>
         </div>
       </div>
 
       <div class="mt-5 space-y-3">
         <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">12 reps</span>
-          </span>
-        </label>
-        <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
-          <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">12 reps</span>
-          </span>
-        </label>
-        <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
-          <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">12 reps</span>
+            <span class="text-xl text-neutral-300">Робоча вага</span>
+            <span class="mono text-paper"><span class="text-xl">6 - 11</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
           </span>
         </label>
 
-        <div class="flex items-start gap-3 pt-2 border-t border-line/60">
-          <svg class="mt-1 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c6f432" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          <p class="text-sm text-neutral-300">Не форсуй вагу.</p>
-        </div>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+            <span class="mono text-paper text-xl">12 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+            <span class="mono text-paper text-xl">12 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300"><span class="text-xl">11</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+            <span class="mono text-paper text-xl">10 reps</span>
+          </span>
+        </label>
       </div>
     </article>
 
+    <!-- EX 3 — Тяга гантелі в нахилі -->
     <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.35s">
       <div class="flex items-start gap-4">
         <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">03</span>
         <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Трицепс</h3>
-          <span class="mono text-paper">(гантеля за голову)</span>
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Тяга гантелі в нахилі</h3>
+          <span class="mono text-paper"><span class="text-xl">(піраміда)</span>
         </div>
       </div>
 
       <div class="mt-5 space-y-3">
+        <label class="check flex items-center gap-3">
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-xl text-neutral-300">Робоча вага</span>
+            <span class="mono text-paper"><span class="text-xl">6 - 11</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
+          </span>
+        </label>
+
         <label class="check flex items-center gap-3">
           <input type="checkbox" />
           <span class="box">
@@ -387,7 +400,7 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">10 reps</span>
+            <span class="mono text-paper text-xl">12 reps</span>
           </span>
         </label>
         <label class="check flex items-center gap-3">
@@ -403,61 +416,12 @@ tailwind.config = {
       </div>
     </article>
 
-
-
-    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.35s">
+    <!-- EX 4 — Планка -->
+    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.45s">
       <div class="flex items-start gap-4">
         <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">04</span>
         <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Біцепс</h3>
-        </div>
-      </div>
-
-      <div class="mt-5 space-y-3">
-        <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
-          <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">6</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">12 reps</span>
-          </span>
-        </label>
-        <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
-          <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">8.5</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">10 reps</span>
-          </span>
-        </label>
-        <label class="check flex items-center gap-3">
-          <input type="checkbox" />
-          <span class="box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </span>
-          <span class="label flex-1 flex items-baseline justify-between gap-3">
-            <span class="text-sm text-neutral-300"><span class="text-xl">11</span> <span class="text-xs text-neutral-500">кг / руку</span></span>
-            <span class="mono text-paper text-xl">10 reps</span>
-          </span>
-        </label>
-      </div>
-    </article>
-
-    
-
-    
-    
-
-    <!-- EX 4 — Dead bug -->
-    <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.45s">
-      <div class="flex items-start gap-4">
-        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">05</span>
-        <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Бокова планка або звичайна</h3>
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Планка</h3>
         </div>
       </div>
 
@@ -469,7 +433,7 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 1</span>
-            <span class="mono text-paper text-xl"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+            <span class="mono text-paper text-xl"><span class="text-xl">40</span> <span class="text-xs text-neutral-500">сек</span></span>
           </span>
         </label>
         <label class="check flex items-center gap-3">
@@ -479,7 +443,7 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 2</span>
-            <span class="mono text-paper text-xl"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+            <span class="mono text-paper text-xl"><span class="text-xl">40</span> <span class="text-xs text-neutral-500">сек</span></span>
           </span>
         </label>
         <label class="check flex items-center gap-3">
@@ -489,21 +453,18 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 3</span>
-            <span class="mono text-paper text-xl"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+            <span class="mono text-paper text-xl"><span class="text-xl">40</span> <span class="text-xs text-neutral-500">сек</span></span>
           </span>
         </label>
-        <div class="flex items-center gap-2 pt-2">
-          <span class="tag" style="border-color: rgba(198,244,50,0.3); color: #c6f432;">На кожну сторону</span>
-        </div>
       </div>
     </article>
 
-    <!-- EX 5 — Турнік -->
+    <!-- EX 5 — Турнік — адаптація -->
     <article class="exercise-card border border-line rounded-2xl p-5 sm:p-6 mb-4 transition reveal" style="animation-delay: 0.5s">
       <div class="flex items-start gap-4">
-        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">06</span>
+        <span class="num display text-4xl sm:text-5xl text-neutral-700 mono transition-colors">05</span>
         <div class="flex-1 min-w-0">
-          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Турнік</h3>
+          <h3 class="display text-2xl sm:text-3xl text-paper leading-tight">Турнік — адаптація</h3>
         </div>
       </div>
 
@@ -520,7 +481,7 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 1</span>
-            <span class="mono text-paper"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+            <span class="mono text-paper"><span class="text-xl">20</span> <span class="text-xs text-neutral-500">сек</span></span>
           </span>
         </label>
         <label class="check flex items-center gap-3 p-4">
@@ -530,7 +491,17 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 2</span>
-            <span class="mono text-paper"><span class="text-xl">30</span> <span class="text-xs text-neutral-500">сек</span></span>
+            <span class="mono text-paper"><span class="text-xl">20</span> <span class="text-xs text-neutral-500">сек</span></span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
+            <span class="mono text-paper"><span class="text-xl">20</span> <span class="text-xs text-neutral-500">сек</span></span>
           </span>
         </label>
       </div>
@@ -548,7 +519,7 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 1</span>
-            <span class="mono text-paper text-xl">3 reps</span>
+            <span class="mono text-paper text-xl">5 reps</span>
           </span>
         </label>
         <label class="check flex items-center gap-3 p-4">
@@ -558,11 +529,24 @@ tailwind.config = {
           </span>
           <span class="label flex-1 flex items-baseline justify-between gap-3">
             <span class="text-sm text-neutral-300">Set 2</span>
+            <span class="mono text-paper text-xl">4 reps</span>
+          </span>
+        </label>
+        <label class="check flex items-center gap-3 p-4">
+          <input type="checkbox" />
+          <span class="box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span class="label flex-1 flex items-baseline justify-between gap-3">
+            <span class="text-sm text-neutral-300">Set 3</span>
             <span class="mono text-paper text-xl">3 reps</span>
           </span>
         </label>
       </div>
     </article>
+
+    
+
     
 
     <!-- Outro -->
